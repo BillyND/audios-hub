@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { fetchNewsData } from "./api";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import toast, { Toaster } from "react-hot-toast";
@@ -7,22 +8,13 @@ import Pagination from "./components/Pagination";
 import NewsRow from "./components/NewsRow";
 import EmptyState from "./components/EmptyState";
 
-// Constants
-const CACHE_KEY = "newsData";
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
 const ITEMS_PER_PAGE = 10;
-
 // Types
 interface NewsItem {
   title: string;
   images: string[];
   audio: string;
   url: string; // Assume URL exists in the data
-}
-
-interface CachedData {
-  data: NewsItem[];
-  timestamp: number;
 }
 
 // Main App component
@@ -34,62 +26,23 @@ const App: React.FC = () => {
 
   // Check cache and fetch data
   useEffect(() => {
-    const fetchNewsData = async (): Promise<void> => {
+    const loadNewsData = async (): Promise<void> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        // Try to get data from cache first
-        const cachedData = localStorage.getItem(CACHE_KEY);
-
-        if (cachedData) {
-          const parsedCache = JSON.parse(cachedData) as CachedData;
-          const now = Date.now();
-
-          // If cache is still valid (within 1 hour)
-          if (now - parsedCache.timestamp < CACHE_DURATION) {
-            setNewsData(parsedCache.data);
-            setIsLoading(false);
-            return;
-          }
-        }
-
-        // If no valid cache, fetch from API
-        const newsEndPoint = import.meta.env.VITE_NEWS_END_POINT as string;
-        if (!newsEndPoint) {
-          throw new Error(
-            "NEWS_END_POINT is not defined in environment variables"
-          );
-        }
-
-        const response = await fetch(newsEndPoint);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = (await response.json()) as NewsItem[];
-
-        // Save to state and cache
+        const data = await fetchNewsData();
         setNewsData(data);
-        localStorage.setItem(
-          CACHE_KEY,
-          JSON.stringify({
-            data,
-            timestamp: Date.now(),
-          })
-        );
       } catch (error) {
-        console.error("Error fetching news:", error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
         setError(`Failed to load news data. ${errorMessage}`);
-        toast.error("Failed to load news data");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchNewsData();
+    loadNewsData();
   }, []);
 
   // Handle pagination
