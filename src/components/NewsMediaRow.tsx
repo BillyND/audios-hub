@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import ActionButton from "./ActionButton";
 import Modal from "./Modal";
+import CustomAudioPlayer from "./CustomAudioPlayer";
 
 interface NewsItem {
   title: string;
@@ -80,7 +81,7 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
           <button
             onClick={() => {
               setIsLargeModal(false);
-              openModal(<audio controls src={item.audio} />);
+              openModal(<CustomAudioPlayer audioUrl={item.audio} />);
             }}
             className="px-2 py-1 bg-gray-100 text-blue-600 hover:text-blue-800 hover:bg-gray-200 rounded text-xs truncate break-all transition-colors flex items-center"
           >
