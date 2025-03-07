@@ -14,18 +14,29 @@ import Pagination from "./Pagination";
 const NewsMediaDashboard: React.FC = () => {
   const { data: newsData, isLoading, error } = useNewsMediaFetch("news");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [filterText, setFilterText] = useState<string>("");
+
+  // Filter data based on title
+  const filteredData = useMemo(() => {
+    if (!newsData) return [];
+    return newsData.filter((item) =>
+      item.title.toLowerCase().includes(filterText.toLowerCase())
+    );
+  }, [newsData, filterText]);
 
   // Handle pagination
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return newsData ? newsData.slice(startIndex, endIndex) : [];
-  }, [newsData, currentPage]);
+    return filteredData ? filteredData.slice(startIndex, endIndex) : [];
+  }, [filteredData, currentPage]);
 
   const totalPages = useMemo(
     () =>
-      newsData ? Math.max(1, Math.ceil(newsData.length / ITEMS_PER_PAGE)) : 1,
-    [newsData]
+      filteredData
+        ? Math.max(1, Math.ceil(filteredData.length / ITEMS_PER_PAGE))
+        : 1,
+    [filteredData]
   );
 
   const handlePageChange = (page: number): void => {
@@ -206,6 +217,16 @@ const NewsMediaDashboard: React.FC = () => {
           <NoNewsMediaState />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            {/* Filter Input */}
+            <div className="p-4">
+              <input
+                type="text"
+                placeholder="Filter by title..."
+                className="w-full px-4 py-2 border rounded-md text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                value={filterText}
+                onChange={(e) => setFilterText(e.target.value)}
+              />
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full table-auto border-collapse">
                 <thead>

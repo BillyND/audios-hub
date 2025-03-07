@@ -66,7 +66,7 @@ function App() {
         containerClassName="toast-container"
         gutter={8}
       />
-      <div className="max-w-5xl mx-auto p-4 sm:p-6">
+      <div className="max-w-5xl mx-auto p-4 sm:p-6 pt-0">
         <div
           className="flex gap-4 mb-4"
           style={{
@@ -74,7 +74,7 @@ function App() {
             top: 0,
             zIndex: 10,
             background: "white",
-            paddingBottom: "16px",
+            paddingBlock: "16px",
             boxShadow: "0 6px 8px -4px rgba(0, 0, 0, 0.05)",
           }}
         >
