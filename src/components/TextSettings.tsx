@@ -43,7 +43,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
         <label className="block text-gray-700 mb-2">Enter Text:</label>
         <textarea
           id="textInput"
-          className="w-full p-3 text-gray-900 rounded-md focus:ring focus:ring-blue-500 transition resize-none h-24 border border-gray-200"
+          className="w-full p-3 text-gray-700 rounded-md focus:ring-blue-500 transition resize-none h-24 border border-gray-300 focus:outline-none focus:border-gray-700"
           placeholder="Type your text here..."
           value={localText}
           onChange={(e) => setLocalText(e.target.value)}
