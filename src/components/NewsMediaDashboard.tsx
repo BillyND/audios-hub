@@ -260,7 +260,7 @@ const NewsMediaDashboard: React.FC = () => {
 
         <footer className="mt-8 text-center text-sm text-gray-500">
           <p className="mb-1">
-            © {new Date().getFullYear()} News Dashboard | Premium Version
+            © {new Date().getFullYear()} NewsSpeak | Premium Version
           </p>
           <p className="text-xs text-gray-400">Data refreshes every hour</p>
         </footer>
