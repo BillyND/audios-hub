@@ -6,7 +6,7 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import Pagination from "./components/Pagination";
 import NewsMediaRow from "./components/NewsMediaRow";
 import NoNewsMediaState from "./components/NoNewsMediaState";
-import useNewsMediaFetch from "./hooks/useFetch";
+import useNewsMediaFetch from "./hooks/useNewsMediaFetch";
 import { NewsItem } from "./api/newsApi";
 
 import { ITEMS_PER_PAGE } from "./constants";
