@@ -1,7 +1,7 @@
 import React from "react";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
-const EmptyState: React.FC = () => (
+const NoNewsMediaState: React.FC = () => (
   <div className="text-center p-12 bg-white rounded-lg shadow-sm border border-gray-200">
     <ExclamationCircleIcon className="h-12 w-12 mx-auto text-gray-400 mb-4" />
     <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -19,4 +19,4 @@ const EmptyState: React.FC = () => (
   </div>
 );
 
-export default EmptyState;
+export default NoNewsMediaState;

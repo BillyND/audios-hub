@@ -1,62 +1,102 @@
-import { useState, useEffect } from "react";
-import { fetchNewsData, NewsItem } from "../api";
+import { useState, useEffect, useCallback } from "react";
+import { fetchNewsData, NewsItem } from "../api/newsApi";
+import cacheService from "../services/cacheService";
 
-const NEWS_DATA_CACHE_PREFIX = "newsData_";
-const CACHE_EXPIRATION_TIME_MS = 10 * 60 * 1000; // 10 minutes
-
-const useFetch = (
-  key: string
-): {
-  data: NewsItem[] | null;
+interface FetchState<T> {
+  data: T | null;
   isLoading: boolean;
   error: string | null;
+}
+
+/**
+ * Custom hook to fetch and cache news data
+ * @param key - Cache key for the data
+ * @param options - Optional configuration
+ */
+const useNewsMediaFetch = (
+  key: string,
+  options?: {
+    skipCache?: boolean;
+    ttl?: number;
+  }
+): FetchState<NewsItem[]> & {
+  refresh: () => Promise<void>;
 } => {
-  const [data, setData] = useState<NewsItem[] | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<FetchState<NewsItem[]>>({
+    data: null,
+    isLoading: true,
+    error: null,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
+  // Extract fetch logic to a separate function that can be called both
+  // in useEffect and from the refresh function
+  const fetchData = useCallback(
+    async (skipCache = options?.skipCache || false) => {
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const localStorageKey = `${NEWS_DATA_CACHE_PREFIX}${key}`;
-      const cachedData = localStorage.getItem(localStorageKey);
-
-      if (cachedData) {
-        try {
-          const parsedData = JSON.parse(cachedData) as NewsItem[];
-          setData(parsedData);
-          setIsLoading(false);
+      // Try to get data from cache if not skipping cache
+      if (!skipCache) {
+        const cachedData = cacheService.get<NewsItem[]>(key);
+        if (cachedData) {
+          setState({
+            data: cachedData.data,
+            isLoading: false,
+            error: null,
+          });
           return;
-        } catch (parseError) {
-          console.error("Error parsing cached data:", parseError);
-          localStorage.removeItem(localStorageKey); // Remove invalid cache
         }
       }
 
+      // Fetch fresh data from API
       try {
         const newsData = await fetchNewsData();
-        setData(newsData);
-        localStorage.setItem(localStorageKey, JSON.stringify(newsData));
 
-        // Set cache expiration (10 minutes)
-        setTimeout(() => {
-          localStorage.removeItem(localStorageKey);
-        }, CACHE_EXPIRATION_TIME_MS);
+        // Cache the fetched data
+        cacheService.set(key, newsData);
+
+        setState({
+          data: newsData,
+          isLoading: false,
+          error: null,
+        });
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
-        setError(`Failed to load data. ${errorMessage}`);
-      } finally {
-        setIsLoading(false);
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: `Failed to load data. ${errorMessage}`,
+        }));
       }
+    },
+    [key, options?.skipCache]
+  );
+
+  // Public refresh function to manually refetch data
+  const refresh = useCallback(async () => {
+    await fetchData(true); // Skip cache when manually refreshing
+  }, [fetchData]);
+
+  // Fetch data on mount or when key changes
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadData = async () => {
+      // Only set state if component is still mounted
+      if (!isMounted) return;
+      await fetchData();
     };
 
-    fetchData();
-  }, [key]);
+    loadData();
 
-  return { data, isLoading, error };
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [key, fetchData]);
+
+  return { ...state, refresh };
 };
 
-export default useFetch;
+export default useNewsMediaFetch;

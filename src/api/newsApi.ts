@@ -1,4 +1,5 @@
 import toast from "react-hot-toast";
+import { newsEndPoint } from "../constants";
 
 // Types
 export interface NewsItem {
@@ -11,12 +12,7 @@ export interface NewsItem {
 // Fetch news data function
 export const fetchNewsData = async (): Promise<NewsItem[]> => {
   try {
-    // Fetch from API
-    const newsEndPoint = import.meta.env.VITE_NEWS_END_POINT as string;
-    if (!newsEndPoint) {
-      throw new Error("NEWS_END_POINT is not defined in environment variables");
-    }
-
+    // Fetch news data function
     const response = await fetch(newsEndPoint);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);

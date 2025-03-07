@@ -4,16 +4,16 @@ import { saveAs } from "file-saver";
 import toast, { Toaster } from "react-hot-toast";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import Pagination from "./components/Pagination";
-import NewsRow from "./components/NewsRow";
-import EmptyState from "./components/EmptyState";
-import useFetch from "./hooks/useFetch";
-import { NewsItem } from "./api";
+import NewsMediaRow from "./components/NewsMediaRow";
+import NoNewsMediaState from "./components/NoNewsMediaState";
+import useNewsMediaFetch from "./hooks/useFetch";
+import { NewsItem } from "./api/newsApi";
 
-const ITEMS_PER_PAGE = 10;
+import { ITEMS_PER_PAGE } from "./constants";
 
 // Main App component
-const App: React.FC = () => {
-  const { data: newsData, isLoading, error } = useFetch("news");
+const NewsMediaDashboard: React.FC = () => {
+  const { data: newsData, isLoading, error } = useNewsMediaFetch("news");
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Handle pagination
@@ -270,7 +270,7 @@ const App: React.FC = () => {
         </header>
 
         {newsData?.length === 0 ? (
-          <EmptyState />
+          <NoNewsMediaState />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
@@ -292,18 +292,22 @@ const App: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedData.map((item, index) => (
-                    <NewsRow
+                  {paginatedData.map((item: NewsItem, index: number) => (
+                    <NewsMediaRow
                       key={index}
                       item={item}
-                      onCopyTitle={(toastId) => copyTitle(toastId, item.title)}
-                      onDownloadImages={(toastId) =>
+                      onCopyTitle={(toastId: string) =>
+                        copyTitle(toastId, item.title)
+                      }
+                      onDownloadImages={(toastId: string) =>
                         downloadImages(toastId, item.images)
                       }
-                      onDownloadAudio={(toastId) =>
+                      onDownloadAudio={(toastId: string) =>
                         downloadAudio(toastId, item.audio)
                       }
-                      onDownloadAll={(toastId) => downloadAll(toastId, item)}
+                      onDownloadAll={(toastId: string) =>
+                        downloadAll(toastId, item)
+                      }
                     />
                   ))}
                 </tbody>
@@ -332,4 +336,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default NewsMediaDashboard;

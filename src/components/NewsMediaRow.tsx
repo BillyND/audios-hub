@@ -23,7 +23,7 @@ interface NewsRowProps {
   onDownloadAll: (toastId: string) => Promise<void>;
 }
 
-const NewsRow: React.FC<NewsRowProps> = ({
+const NewsMediaRow: React.FC<NewsRowProps> = ({
   item,
   onCopyTitle,
   onDownloadImages,
@@ -132,4 +132,4 @@ const NewsRow: React.FC<NewsRowProps> = ({
   );
 };
 
-export default NewsRow;
+export default NewsMediaRow;
