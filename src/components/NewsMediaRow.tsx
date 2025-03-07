@@ -55,6 +55,7 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
             setIsLargeModal(true);
             openModal(<iframe src={item.url} className="w-full h-96" />);
           }}
+          title={item.title}
         >
           <span className="group-hover:text-indigo-600 transition-colors">
             {truncateTitle(item.title)}
@@ -67,7 +68,9 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
                 key={idx}
                 onClick={() => {
                   setIsLargeModal(true);
-                  openModal(<img src={image} alt={`Image ${idx + 1}`} />);
+                  openModal(
+                    <img src={image} alt={item.title} loading="lazy" />
+                  );
                 }}
                 className="px-2 py-1 bg-gray-100 text-blue-600 hover:text-blue-800 hover:bg-gray-200 rounded text-xs break-all transition-colors flex items-center"
               >
