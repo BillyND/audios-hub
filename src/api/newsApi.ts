@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { newsEndPoint } from "../constants";
+import { baseEndPoint } from "../constants";
 
 // Types
 export interface NewsItem {
@@ -13,6 +13,8 @@ let pendingRequest: Promise<NewsItem[]> | null = null;
 
 // Fetch news data function
 export const fetchNewsData = async (): Promise<NewsItem[]> => {
+  const newsEndPoint = `${baseEndPoint}/news`;
+
   if (pendingRequest) {
     // If a request is already in progress, return the existing promise
     return pendingRequest;
@@ -45,5 +47,43 @@ export const fetchNewsData = async (): Promise<NewsItem[]> => {
     if (pendingRequest) {
       pendingRequest = null;
     }
+  }
+};
+
+export const fetchTTSData = async (
+  text: string,
+  voice: string,
+  speed: number,
+  optimizeAI: boolean
+) => {
+  const ttsEndPoint = `${baseEndPoint}/tts`;
+
+  try {
+    const response = await fetch(ttsEndPoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: text,
+        language: voice,
+        speed: String(speed),
+        isOptimizeWithAI: optimizeAI,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const audioUrl = URL.createObjectURL(blob);
+    return { audioUrl };
+  } catch (error) {
+    console.error("Error fetching TTS:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error occurred";
+    toast.error("Failed to generate speech");
+    throw new Error(`Failed to generate speech. ${errorMessage}`);
   }
 };

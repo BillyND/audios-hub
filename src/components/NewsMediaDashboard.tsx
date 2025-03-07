@@ -1,15 +1,14 @@
-import { useState, useCallback, useMemo } from "react";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
-import toast, { Toaster } from "react-hot-toast";
 import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
-import Pagination from "./components/Pagination";
-import NewsMediaRow from "./components/NewsMediaRow";
-import NoNewsMediaState from "./components/NoNewsMediaState";
-import useNewsMediaFetch from "./hooks/useNewsMediaFetch";
-import { NewsItem } from "./api/newsApi";
-
-import { ITEMS_PER_PAGE } from "./constants";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
+import { useCallback, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { NewsItem } from "../api/newsApi";
+import { ITEMS_PER_PAGE } from "../constants";
+import useNewsMediaFetch from "../hooks/useNewsMediaFetch";
+import NewsMediaRow from "./NewsMediaRow";
+import NoNewsMediaState from "./NoNewsMediaState";
+import Pagination from "./Pagination";
 
 // Main App component
 const NewsMediaDashboard: React.FC = () => {
@@ -203,72 +202,6 @@ const NewsMediaDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto p-4 py-8 max-w-6xl">
-        {/* Toast container with limits based on device */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              background: "#fff",
-              color: "#333",
-              borderRadius: "8px",
-              boxShadow:
-                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-              padding: "16px",
-              fontSize: "14px",
-            },
-            success: {
-              iconTheme: {
-                primary: "#10B981",
-                secondary: "#fff",
-              },
-              style: {
-                borderLeft: "4px solid #10B981",
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: "#EF4444",
-                secondary: "#fff",
-              },
-              style: {
-                borderLeft: "4px solid #EF4444",
-              },
-            },
-            loading: {
-              style: {
-                borderLeft: "4px solid #3B82F6",
-              },
-            },
-          }}
-          // Limit the number of toasts based on device
-          containerStyle={{
-            top: 20,
-            right: 20,
-          }}
-          containerClassName="toast-container"
-          // Use 1 toast for mobile, 3 for desktop
-          gutter={8}
-        />
-
-        <header className="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                News Dashboard
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Browse, download and manage news content
-              </p>
-            </div>
-            <div className="hidden md:block">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                {newsData ? newsData.length : 0} items
-              </span>
-            </div>
-          </div>
-        </header>
-
         {newsData?.length === 0 ? (
           <NoNewsMediaState />
         ) : (
