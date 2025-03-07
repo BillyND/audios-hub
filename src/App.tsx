@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { fetchNewsData } from "./api";
+import { useState, useCallback, useMemo } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import toast, { Toaster } from "react-hot-toast";
@@ -7,53 +6,26 @@ import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import Pagination from "./components/Pagination";
 import NewsRow from "./components/NewsRow";
 import EmptyState from "./components/EmptyState";
+import useFetch from "./hooks/useFetch";
+import { NewsItem } from "./api";
 
 const ITEMS_PER_PAGE = 10;
-// Types
-interface NewsItem {
-  title: string;
-  images: string[];
-  audio: string;
-  url: string; // Assume URL exists in the data
-}
 
 // Main App component
 const App: React.FC = () => {
-  const [newsData, setNewsData] = useState<NewsItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: newsData, isLoading, error } = useFetch("news");
   const [currentPage, setCurrentPage] = useState<number>(1);
-
-  // Check cache and fetch data
-  useEffect(() => {
-    const loadNewsData = async (): Promise<void> => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const data = await fetchNewsData();
-        setNewsData(data);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error occurred";
-        setError(`Failed to load news data. ${errorMessage}`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadNewsData();
-  }, []);
 
   // Handle pagination
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return newsData.slice(startIndex, endIndex);
+    return newsData ? newsData.slice(startIndex, endIndex) : [];
   }, [newsData, currentPage]);
 
   const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(newsData.length / ITEMS_PER_PAGE)),
+    () =>
+      newsData ? Math.max(1, Math.ceil(newsData.length / ITEMS_PER_PAGE)) : 1,
     [newsData]
   );
 
@@ -291,13 +263,13 @@ const App: React.FC = () => {
             </div>
             <div className="hidden md:block">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                {newsData.length} items
+                {newsData ? newsData.length : 0} items
               </span>
             </div>
           </div>
         </header>
 
-        {newsData.length === 0 ? (
+        {newsData?.length === 0 ? (
           <EmptyState />
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
