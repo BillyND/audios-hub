@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ClipboardDocumentIcon,
   PhotoIcon,
@@ -24,13 +24,35 @@ interface NewsRowProps {
   onDownloadAll: (toastId: string) => Promise<void>;
 }
 
-const NewsMediaRow: React.FC<NewsRowProps> = ({
+const NewsMediaRowComponent: React.FC<NewsRowProps> = ({
   item,
   onCopyTitle,
   onDownloadImages,
   onDownloadAudio,
   onDownloadAll,
 }) => {
+  const [isDone, setIsDone] = useState(false);
+  const storageKey = `posted_${item.url}`;
+
+  useEffect(() => {
+    const storedDone = localStorage.getItem(storageKey);
+
+    if (storedDone) {
+      setIsDone(storedDone === "true");
+    }
+  }, [item.url, storageKey]);
+
+  const handleDoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDone = e.target.checked;
+    setIsDone(newDone);
+
+    if (newDone) {
+      localStorage.setItem(storageKey, String(newDone));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  };
+
   const truncateTitle = (title: string, maxLength: number = 80): string => {
     return title.length > maxLength
       ? `${title.substring(0, maxLength)}...`
@@ -96,14 +118,14 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
           <div className="flex flex-wrap gap-2">
             <ActionButton
               onClick={(toastId) => onCopyTitle(toastId)}
-              icon={<ClipboardDocumentIcon className="h-4 w-4" />}
+              icon=<ClipboardDocumentIcon className="h-4 w-4" />
               text="Copy"
               bgColor="bg-blue-700"
               hoverColor="hover:bg-slate-800"
             />
             <ActionButton
               onClick={(toastId) => onDownloadImages(toastId)}
-              icon={<PhotoIcon className="h-4 w-4" />}
+              icon=<PhotoIcon className="h-4 w-4" />
               text="Images"
               bgColor="bg-indigo-600"
               hoverColor="hover:bg-indigo-700"
@@ -111,17 +133,28 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
             />
             <ActionButton
               onClick={(toastId) => onDownloadAudio(toastId)}
-              icon={<SpeakerWaveIcon className="h-4 w-4" />}
+              icon=<SpeakerWaveIcon className="h-4 w-4" />
               text="Audio"
               bgColor="bg-purple-600"
               hoverColor="hover:bg-purple-700"
             />
             <ActionButton
               onClick={(toastId) => onDownloadAll(toastId)}
-              icon={<ArrowDownTrayIcon className="h-4 w-4" />}
+              icon=<ArrowDownTrayIcon className="h-4 w-4" />
               text="All"
               bgColor="bg-red-600"
               hoverColor="hover:bg-emerald-700"
+            />
+          </div>
+        </td>
+        <td className="px-4 py-3 border-b border-gray-200 whitespace-normal text-sm text-gray-900">
+          <div className="flex justify-center">
+            <input
+              type="checkbox"
+              id={`isDone-${item.url}`}
+              className="h-5 w-5 rounded border-gray-300 text-gray-900 focus:ring-gray-500"
+              checked={isDone}
+              onChange={handleDoneChange}
             />
           </div>
         </td>
@@ -136,4 +169,4 @@ const NewsMediaRow: React.FC<NewsRowProps> = ({
   );
 };
 
-export default NewsMediaRow;
+export default NewsMediaRowComponent;

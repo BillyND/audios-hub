@@ -243,6 +243,9 @@ const NewsMediaDashboard: React.FC = () => {
                     <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
+                    <th className="px-4 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Posted
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
