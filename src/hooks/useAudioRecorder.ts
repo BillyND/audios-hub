@@ -17,6 +17,7 @@ interface UseAudioRecorderResult {
   recordings: RecordingItem[];
   deleteRecording: (id: string) => Promise<void>;
   clearAllRecordings: () => Promise<void>;
+  uploadRecordings: (files: File[]) => Promise<void>;
 }
 
 const dbConfig = {
@@ -272,9 +273,57 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
       toast.success("All recordings cleared");
     } catch (error) {
       console.error("Failed to clear recordings:", error);
-      toast.error("Failed to clear recordings");
+      toast.error("Failed to clear recordings.");
     }
   }, [recordings]);
+
+  const uploadRecordings = useCallback(async (files: File[]) => {
+    if (!files || files.length === 0) {
+      toast.error("No files selected for upload.");
+      return;
+    }
+
+    try {
+      const newRecordings: RecordingItem[] = [];
+
+      for (const file of files) {
+        if (file.type !== "audio/mpeg") {
+          toast.error(`Unsupported file type: ${file.name}`);
+          continue;
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        const audioUrl = URL.createObjectURL(file);
+        const timestamp = Date.now();
+
+        const newItem: RecordingItem = {
+          id: timestamp.toString(),
+          audioUrl,
+          audioBinary: arrayBuffer,
+          timestamp,
+          text: `Uploaded recording from ${new Date(
+            timestamp
+          ).toLocaleString()}`,
+        };
+
+        await addItem(dbConfig, "recordings", newItem);
+        newRecordings.push(newItem);
+      }
+
+      if (newRecordings.length > 0) {
+        setRecordings((prevRecordings) => [
+          ...newRecordings,
+          ...prevRecordings,
+        ]);
+        toast.success(
+          `${newRecordings.length} recording(s) uploaded successfully.`
+        );
+      }
+    } catch (error) {
+      console.error("Failed to upload recordings:", error);
+      toast.error("Failed to upload recordings.");
+    }
+  }, []);
 
   return {
     startRecording,
@@ -283,6 +332,7 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
     recordings,
     deleteRecording,
     clearAllRecordings,
+    uploadRecordings,
   };
 };
 
