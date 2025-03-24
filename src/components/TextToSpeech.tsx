@@ -26,6 +26,8 @@ const TextToSpeech = () => {
     setIsOptimizeWithAI,
   } = useTTS();
 
+  console.log("===>history", history);
+
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
       <div className="max-w-5xl mx-auto p-4">

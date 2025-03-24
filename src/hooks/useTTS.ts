@@ -59,6 +59,7 @@ const initDB = (): Promise<IDBDatabase> => {
         "Error opening IndexedDB",
         (event.target as IDBOpenDBRequest).error
       );
+      toast.error("Unable to access speech component database");
       reject(new Error("Failed to open database"));
     };
 
@@ -76,6 +77,7 @@ const initDB = (): Promise<IDBDatabase> => {
       // Create settings object store with a single record for all settings
       if (!db.objectStoreNames.contains(settingsStoreName)) {
         db.createObjectStore(settingsStoreName, { keyPath: "id" });
+        toast.success("Text-to-Speech configuration upgraded");
       }
     };
 
@@ -98,12 +100,16 @@ const saveSettings = async (settings: TTSSettings): Promise<void> => {
       const request = store.put(settings); // Pass the settings object directly
 
       request.onsuccess = () => resolve();
-      request.onerror = () => reject(new Error("Failed to save settings"));
+      request.onerror = () => {
+        reject(new Error("Could not store TTS settings"));
+        toast.error("Failed to save speech settings");
+      };
 
       transaction.oncomplete = () => db.close();
     });
   } catch (error) {
     console.error("Error saving settings:", error);
+    toast.error("Unexpected issue storing TTS settings");
     throw error;
   }
 };
@@ -130,12 +136,16 @@ const loadSettings = async (): Promise<TTSSettings> => {
         resolve(request.result ? request.result : defaultSettings);
       };
 
-      request.onerror = () => reject(new Error("Failed to load settings"));
+      request.onerror = () => {
+        reject(new Error("Could not retrieve TTS settings"));
+        toast.error("Failed to load settings");
+      };
 
       transaction.oncomplete = () => db.close();
     });
   } catch (error) {
     console.error("Error loading settings:", error);
+    toast.error("Unexpected error loading TTS settings");
     // Return default values if settings can't be loaded
     return {
       id: 1, // Ensure default also contains id
@@ -159,14 +169,19 @@ const addHistoryItem = async (item: TTSHistoryItem): Promise<string> => {
 
       request.onsuccess = () => {
         resolve(request.result as string);
+        toast.success("Speech history recorded");
       };
 
-      request.onerror = () => reject(new Error("Failed to add history item"));
+      request.onerror = () => {
+        reject(new Error("Could not store speech history item"));
+        toast.error("Failed to add history entry");
+      };
 
       transaction.oncomplete = () => db.close();
     });
   } catch (error) {
     console.error("Error adding history item:", error);
+    toast.error("Error occurred while saving speech");
     throw error;
   }
 };
@@ -181,9 +196,12 @@ const deleteHistoryItemFromDB = async (id: string): Promise<void> => {
 
       const request = store.delete(id);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () =>
-        reject(new Error(`Failed to delete history item with ID ${id}`));
+      request.onsuccess = () => {
+        resolve();
+      };
+      request.onerror = () => {
+        reject(new Error(`Could not delete speech history item with ID ${id}`));
+      };
 
       transaction.oncomplete = () => db.close();
     });
@@ -217,12 +235,16 @@ const loadHistory = async (): Promise<TTSHistoryItem[]> => {
         resolve(processedItems);
       };
 
-      request.onerror = () => reject(new Error("Failed to load history"));
+      request.onerror = () => {
+        reject(new Error("Could not fetch speech history"));
+        toast.error("Failed to load speech history");
+      };
 
       transaction.oncomplete = () => db.close();
     });
   } catch (error) {
     console.error("Error loading history:", error);
+    toast.error("Unexpected error fetching speech history");
     return [];
   }
 };
@@ -237,13 +259,20 @@ const clearHistory = async (): Promise<void> => {
 
       const request = store.clear();
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(new Error("Failed to clear history"));
+      request.onsuccess = () => {
+        resolve();
+        toast.success("All speech history cleared");
+      };
+      request.onerror = () => {
+        reject(new Error("Could not erase speech history"));
+        toast.error("Failed to clear history records");
+      };
 
       transaction.oncomplete = () => db.close();
     });
   } catch (error) {
     console.error("Error clearing history:", error);
+    toast.error("Unexpected error erasing speech history");
     throw error;
   }
 };
@@ -276,7 +305,7 @@ const useTTS = (): UseTTSResult => {
         setIsInitialized(true);
       } catch (error) {
         console.error("Failed to initialize:", error);
-        toast.error("Failed to load saved data");
+        toast.error("Unable to initialize TTS application");
         setIsInitialized(true); // Set to true anyway to not block the app
       }
     };
@@ -309,6 +338,7 @@ const useTTS = (): UseTTSResult => {
         });
       } catch (error) {
         console.error("Failed to save settings:", error);
+        toast.error("Problem saving text-to-speech settings");
       }
     };
 
@@ -317,7 +347,7 @@ const useTTS = (): UseTTSResult => {
 
   const generateSpeech = async (text: string, isOptimizeWithAI: boolean) => {
     if (!text) {
-      toast.error("Please enter some text!");
+      toast.error("Text input cannot be empty!");
       return;
     }
 
@@ -353,14 +383,14 @@ const useTTS = (): UseTTSResult => {
           setAudioUrl(audioUrl);
         } catch (error) {
           console.error("Failed to save history item:", error);
-          toast.error("Generated speech but failed to save to history");
+          toast.error("Speech generated but not saved to history");
           // Still set the audio URL so it can be played
           setAudioUrl(audioUrl);
         }
       }
     } catch (error) {
       console.error("Error generating TTS:", error);
-      toast.error("Failed to generate speech. Please try again.");
+      toast.error("Speech synthesis failed. Try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -389,9 +419,10 @@ const useTTS = (): UseTTSResult => {
       if (itemToDelete && itemToDelete.audioUrl === audioUrl) {
         setAudioUrl(null);
       }
+      toast.success("Speech item successfully removed");
     } catch (error) {
       console.error(`Failed to delete history item with ID ${id}:`, error);
-      toast.error("Failed to delete history item");
+      toast.error("Error attempting to delete history entry");
     }
   };
 
@@ -410,10 +441,10 @@ const useTTS = (): UseTTSResult => {
       // Update state
       setHistory([]);
       setAudioUrl(null);
-      toast.success("History cleared");
+      toast.success("Complete speech history successfully erased");
     } catch (error) {
       console.error("Failed to clear history:", error);
-      toast.error("Failed to clear history");
+      toast.error("Issues encountered while clearing history");
     }
   };
 

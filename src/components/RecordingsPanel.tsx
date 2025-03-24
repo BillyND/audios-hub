@@ -1,17 +1,18 @@
 import { Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useBreakpoints } from "../hooks/useBreakpoints";
+import { RecordingItem } from "../hooks/useAudioRecorder";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import Modal from "./Modal";
 
-interface HistoryPanelProps {
-  history: { id: string; text: string; audioUrl: string }[];
-  deleteHistoryItem: (id: string) => Promise<void>;
+interface RecordingsPanelProps {
+  recordings: RecordingItem[];
+  deleteRecording: (id: string) => Promise<void>;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({
-  history,
-  deleteHistoryItem,
+const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
+  recordings,
+  deleteRecording,
 }) => {
   const { isMobile } = useBreakpoints();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +21,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
   );
 
   const handleDelete = async (id: string) => {
-    const itemToDelete = history.find((item) => item.id === id);
+    const itemToDelete = recordings.find((item) => item.id === id);
     if (!itemToDelete) {
       console.error("No item found with id:", id);
       return;
@@ -29,7 +30,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
     console.log("Deleting item:", itemToDelete);
 
     try {
-      await deleteHistoryItem(id);
+      await deleteRecording(id);
     } catch (error) {
       console.error("Failed to delete item:", error);
     }
@@ -44,33 +45,25 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
 
   return (
     <div
-      id="history-panel"
+      id="recordings-panel"
       className="md:w-1/3 flex flex-col"
-      style={
-        isMobile
-          ? { minWidth: "200px" }
-          : { height: "calc(100dvh - 170px)", minWidth: "200px" }
-      }
+      style={isMobile ? {} : { height: "calc(100dvh - 170px)" }}
     >
-      <h3 className="text-lg font-semibold mb-1">History</h3>
-      <div id="historyContainer" className="space-y-3 md:overflow-y-auto">
-        {history.map((item) => {
-          const truncatedText =
-            item?.text?.length > 50
-              ? `${item?.text?.slice(0, 50)}...`
-              : item?.text;
+      <h3 className="text-lg font-semibold mb-1">Recordings</h3>
+      <div id="recordingsContainer" className="space-y-3 md:overflow-y-auto">
+        {recordings.map((item) => {
           return (
             <div
               key={item.id}
               className="p-3 bg-gray-100 rounded-md flex justify-between align-items-start"
             >
-              <div>
+              <div className="w-full">
                 <div className="flex justify-between gap-2">
                   <p
                     className="text-sm text-gray-700"
                     style={{ wordBreak: "break-word" }}
                   >
-                    {truncatedText}
+                    {item.text}
                   </p>
 
                   <button
@@ -80,14 +73,16 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
                     <Trash2 width={16} height={16} />
                   </button>
                 </div>
-                <CustomAudioPlayer
-                  audioUrl={item.audioUrl}
-                  title={truncatedText}
-                />
+                <CustomAudioPlayer audioUrl={item.audioUrl} title={item.text} />
               </div>
             </div>
           );
         })}
+        {recordings.length === 0 && (
+          <div className="text-center text-gray-500 py-4">
+            No recordings yet. Click the record button to start recording.
+          </div>
+        )}
       </div>
       <Modal
         isOpen={isModalOpen}
@@ -95,7 +90,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
         title="Confirm Deletion"
         content={
           <div className="flex flex-col items-center">
-            <p>Are you sure you want to delete this item?</p>
+            <p>Are you sure you want to delete this recording?</p>
 
             <div className="mt-4 flex justify-end gap-3">
               <button
@@ -121,4 +116,4 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({
   );
 };
 
-export default HistoryPanel;
+export default RecordingsPanel;

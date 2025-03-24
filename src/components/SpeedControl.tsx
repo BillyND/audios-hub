@@ -30,7 +30,7 @@ const SpeedControl: React.FC<SpeedControlProps> = ({
   return (
     <div className="mt-4">
       <label className="block text-gray-700 mb-2">
-        Speed: <span id="speedValue">{speed}</span>x
+        Speed: <span id="speedValue">{localSpeed}</span>x
       </label>
       <input
         type="range"

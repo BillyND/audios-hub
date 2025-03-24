@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Toaster } from "react-hot-toast";
 import "./App.css";
-import NewsMediaDashboard from "./components/NewsMediaDashboard";
 import TextToSpeech from "./components/TextToSpeech";
+import AudioRecorderPanel from "./components/AudioRecorderPanel";
 
 enum Tab {
-  NEWS = "news",
   TTS = "tts",
+  LOOP_MP3 = "loop_mp3",
 }
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>(
-    (new URLSearchParams(window.location.search).get("tab") as Tab) || Tab.NEWS
+    (new URLSearchParams(window.location.search).get("tab") as Tab) || Tab.TTS
   );
 
   useEffect(() => {
@@ -19,6 +19,14 @@ function App() {
     url.searchParams.set("tab", activeTab);
     window.history.pushState({}, "", url.toString());
   }, [activeTab]);
+
+  const tabComponents = useMemo(
+    () => ({
+      [Tab.TTS]: <TextToSpeech />,
+      [Tab.LOOP_MP3]: <AudioRecorderPanel />,
+    }),
+    []
+  );
 
   return (
     <div className="bg-white text-gray-900 font-sans">
@@ -78,7 +86,7 @@ function App() {
             boxShadow: "0 6px 8px -4px rgba(0, 0, 0, 0.05)",
           }}
         >
-          <button
+          {/* <button
             className={`tab-btn flex-1 py-2 text-center rounded-md ${
               activeTab === Tab.NEWS
                 ? "bg-black text-white"
@@ -87,7 +95,7 @@ function App() {
             onClick={() => setActiveTab(Tab.NEWS)}
           >
             News Media
-          </button>
+          </button> */}
           <button
             className={`tab-btn flex-1 py-2 text-center rounded-md ${
               activeTab === Tab.TTS
@@ -98,8 +106,18 @@ function App() {
           >
             Text to Speech
           </button>
+          <button
+            className={`tab-btn flex-1 py-2 text-center rounded-md ${
+              activeTab === Tab.LOOP_MP3
+                ? "bg-black text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+            onClick={() => setActiveTab(Tab.LOOP_MP3)}
+          >
+            Audio Recorder
+          </button>
         </div>
-        {activeTab === Tab.NEWS ? <NewsMediaDashboard /> : <TextToSpeech />}
+        {tabComponents[activeTab]}
       </div>
     </div>
   );
