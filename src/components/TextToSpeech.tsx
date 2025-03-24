@@ -58,8 +58,8 @@ const TextToSpeech = () => {
               <AudioPlayer audioUrl={audioUrl} isLoading={isLoading} />
             </div>
 
-            {/* Right Panel (History) */}
-            <AudiosHistory items={history} deleteItem={deleteHistoryItem} />
+            {/* Right Panel: History of Audios */}
+            <AudiosHistory audios={history} deleteItem={deleteHistoryItem} />
           </div>
         </div>
       </div>
