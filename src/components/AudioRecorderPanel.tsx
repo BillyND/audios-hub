@@ -164,8 +164,8 @@ const AudioRecorderPanel = () => {
               </div>
             </div>
 
-            {/* Right Panel (History) */}
-            <AudiosHistory items={recordings} deleteItem={deleteRecording} />
+            {/* Right Panel: History of Audios */}
+            <AudiosHistory audios={recordings} deleteItem={deleteRecording} />
           </div>
         </div>
       </div>
