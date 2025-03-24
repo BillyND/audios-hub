@@ -5,45 +5,57 @@ import CustomAudioPlayer from "./CustomAudioPlayer";
 import Modal from "./Modal";
 
 interface HistoryPanelProps {
-  history: { text: string; audioUrl: string }[];
-  setHistory: React.Dispatch<
-    React.SetStateAction<{ text: string; audioUrl: string }[]>
-  >;
+  history: { id: string; text: string; audioUrl: string }[];
+  deleteHistoryItem: (id: string) => Promise<void>;
 }
 
-const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, setHistory }) => {
+const HistoryPanel: React.FC<HistoryPanelProps> = ({
+  history,
+  deleteHistoryItem,
+}) => {
   const { isMobile } = useBreakpoints();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pendingDeletionIndex, setPendingDeletionIndex] = useState<
-    number | null
-  >(null);
+  const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(
+    null
+  );
 
-  const handleDelete = (indexToDelete: number) => {
-    setHistory((prevHistory) =>
-      prevHistory.filter((_, index) => index !== indexToDelete)
-    );
+  const handleDelete = async (id: string) => {
+    const itemToDelete = history.find((item) => item.id === id);
+    if (!itemToDelete) {
+      console.error("No item found with id:", id);
+      return;
+    }
+
+    console.log("Deleting item:", itemToDelete);
+
+    try {
+      await deleteHistoryItem(id);
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+    }
+
     setIsModalOpen(false);
   };
 
-  const openModal = (index: number) => {
-    setPendingDeletionIndex(index);
+  const openModal = (id: string) => {
+    setPendingDeletionId(id);
     setIsModalOpen(true);
   };
 
   return (
     <div
       id="history-panel"
-      className="md:w-1/3 flex flex-col md:overflow-y-auto"
-      style={isMobile ? {} : { maxHeight: "90vh" }}
+      className="md:w-1/3 flex flex-col"
+      style={isMobile ? {} : { height: "calc(100dvh - 170px)" }}
     >
-      <h3 className="text-lg font-semibold mb-3">History</h3>
-      <div id="historyContainer" className="space-y-3">
-        {history.map((item, index) => {
+      <h3 className="text-lg font-semibold mb-1">History</h3>
+      <div id="historyContainer" className="space-y-3 md:overflow-y-auto">
+        {history.map((item) => {
           const truncatedText =
             item.text.length > 50 ? `${item.text.slice(0, 50)}...` : item.text;
           return (
             <div
-              key={index}
+              key={item.id}
               className="p-3 bg-gray-100 rounded-md flex justify-between align-items-start"
             >
               <div>
@@ -56,13 +68,16 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, setHistory }) => {
                   </p>
 
                   <button
-                    onClick={() => openModal(index)}
+                    onClick={() => openModal(item.id)}
                     className="text-red-500 flex justify-between align-items-start"
                   >
                     <Trash2 width={16} height={16} />
                   </button>
                 </div>
-                <CustomAudioPlayer audioUrl={item.audioUrl} />
+                <CustomAudioPlayer
+                  audioUrl={item.audioUrl}
+                  title={truncatedText}
+                />
               </div>
             </div>
           );
@@ -85,8 +100,8 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ history, setHistory }) => {
               </button>
               <button
                 onClick={() => {
-                  if (pendingDeletionIndex !== null)
-                    handleDelete(pendingDeletionIndex);
+                  if (pendingDeletionId !== null)
+                    handleDelete(pendingDeletionId);
                 }}
                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center justify-center text-sm"
               >

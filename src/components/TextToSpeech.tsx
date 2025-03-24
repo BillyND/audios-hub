@@ -13,10 +13,10 @@ const TextToSpeech = () => {
     generateSpeech,
     audioUrl,
     history,
-    setHistory,
     languages,
     isLoading,
     language,
+    deleteHistoryItem,
     setLanguage,
     speed,
     setSpeed,
@@ -27,19 +27,15 @@ const TextToSpeech = () => {
   } = useTTS();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-5xl mx-auto p-4 py-8">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
+      <div className="max-w-5xl mx-auto p-4">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div
             className="flex flex-col md:flex-row gap-6 content-wrapper p-4"
             style={isMobile ? {} : { maxHeight: "90vdh" }}
           >
             {/* Left Panel (TTS) */}
-            <div
-              id="tts-panel"
-              className="md:w-2/3 flex flex-col"
-              // className="md:w-2/3 flex flex-col overflow-y-auto"
-            >
+            <div id="tts-panel" className="md:w-2/3 flex flex-col">
               <TextSettings
                 text={text}
                 setText={setText}
@@ -63,7 +59,10 @@ const TextToSpeech = () => {
             </div>
 
             {/* Right Panel (History) */}
-            <HistoryPanel history={history} setHistory={setHistory} />
+            <HistoryPanel
+              history={history}
+              deleteHistoryItem={deleteHistoryItem}
+            />
           </div>
         </div>
       </div>

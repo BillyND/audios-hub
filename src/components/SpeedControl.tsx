@@ -17,7 +17,15 @@ const SpeedControl: React.FC<SpeedControlProps> = ({
 
   useEffect(() => {
     setSpeed(debouncedSpeed);
-  }, [debouncedSpeed, setSpeed]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSpeed]);
+
+  useEffect(() => {
+    if (speed !== debouncedSpeed) {
+      setLocalSpeed(speed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speed]);
 
   return (
     <div className="mt-4">
