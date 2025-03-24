@@ -5,11 +5,14 @@ import CustomAudioPlayer from "./CustomAudioPlayer";
 import Modal from "./Modal";
 
 interface AudiosHistoryProps {
-  items: { id: string; text: string; audioUrl: string }[];
+  audios: { id: string; text: string; audioUrl: string }[];
   deleteItem: (id: string) => Promise<void>;
 }
 
-const AudiosHistory: React.FC<AudiosHistoryProps> = ({ items, deleteItem }) => {
+const AudiosHistory: React.FC<AudiosHistoryProps> = ({
+  audios,
+  deleteItem,
+}) => {
   const { isMobile } = useBreakpoints();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(
@@ -17,16 +20,16 @@ const AudiosHistory: React.FC<AudiosHistoryProps> = ({ items, deleteItem }) => {
   );
 
   const handleDelete = async (id: string) => {
-    const itemToDelete = items.find((item) => item.id === id);
-    if (!itemToDelete) {
-      console.error("No item found with id:", id);
+    const audioToDelete = audios.find((audio) => audio.id === id);
+    if (!audioToDelete) {
+      console.error("No audio found with id:", id);
       return;
     }
 
     try {
       await deleteItem(id);
     } catch (error) {
-      console.error("Failed to delete item:", error);
+      console.error("Failed to delete audio:", error);
     }
 
     setIsModalOpen(false);
@@ -45,15 +48,17 @@ const AudiosHistory: React.FC<AudiosHistoryProps> = ({ items, deleteItem }) => {
     >
       <h3 className="text-lg font-semibold mb-1">Audios History</h3>
       <div id="itemsContainer" className="space-y-3 md:overflow-y-auto">
-        {items.map((item) => {
+        {audios.map((audio) => {
           const truncatedText =
-            item.text.length > 50 ? item.text.slice(0, 50) + "..." : item.text;
+            audio.text.length > 50
+              ? audio.text.slice(0, 50) + "..."
+              : audio.text;
           return (
             <div
-              key={item.id}
+              key={audio.id}
               className="p-3 bg-gray-100 rounded-md flex justify-between align-items-start w-full"
             >
-              <div className="w-full">
+              <div className="w-full flex flex-col gap-1">
                 <div className="flex justify-between gap-2">
                   <p
                     className="text-sm text-gray-700"
@@ -63,21 +68,21 @@ const AudiosHistory: React.FC<AudiosHistoryProps> = ({ items, deleteItem }) => {
                   </p>
 
                   <button
-                    onClick={() => openModal(item.id)}
+                    onClick={() => openModal(audio.id)}
                     className="text-red-500 flex justify-between align-items-start"
                   >
                     <Trash2 width={16} height={16} />
                   </button>
                 </div>
                 <CustomAudioPlayer
-                  audioUrl={item.audioUrl}
+                  audioUrl={audio.audioUrl}
                   title={truncatedText}
                 />
               </div>
             </div>
           );
         })}
-        {items.length === 0 && (
+        {audios.length === 0 && (
           <div className="text-center text-gray-500 py-4">
             No items yet. Click the record button to start recording.
           </div>
