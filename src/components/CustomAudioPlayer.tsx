@@ -1,4 +1,4 @@
-import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX, Repeat } from "lucide-react";
 import React, {
   useEffect,
   useRef,
@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { useAudioStore } from "../store/audioStore";
 
 interface CustomAudioPlayerProps {
   audioUrl: string;
@@ -16,13 +17,15 @@ let cachedVolume: number = 1;
 let cachedIsMuted: boolean = false;
 
 const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentPlayingId, setCurrentPlayingId } = useAudioStore();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [volume, setVolume] = useState<number>(cachedVolume);
   const [isMuted, setIsMuted] = useState<boolean>(cachedIsMuted);
   const [playbackRate, setPlaybackRate] = useState<number>(cachedPlaybackRate);
+  const [isRepeating, setIsRepeating] = useState<boolean>(false);
 
   // Memoized event handlers for audio element
   const setAudioData = useCallback(() => {
@@ -42,54 +45,40 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
     setCurrentTime(0);
   }, []);
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+  const togglePlay = useCallback(
+    (forcePlay?: boolean) => {
+      if (!audioRef.current) return;
 
-    audio.addEventListener("loadedmetadata", setAudioData);
-    audio.addEventListener("timeupdate", setAudioTime);
-    audio.addEventListener("ended", onEnded);
+      let isPlayingClone = isPlaying;
 
-    return () => {
-      audio.removeEventListener("loadedmetadata", setAudioData);
-      audio.removeEventListener("timeupdate", setAudioTime);
-      audio.removeEventListener("ended", onEnded);
-    };
-  }, [audioUrl, setAudioData, setAudioTime, onEnded]);
+      if (typeof forcePlay === "boolean") {
+        isPlayingClone = !forcePlay;
+      }
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.playbackRate = playbackRate;
-    }
-    cachedPlaybackRate = playbackRate;
-  }, [playbackRate, audioUrl]);
+      if (isPlayingClone) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
 
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.muted = isMuted;
-    }
-    cachedVolume = volume;
-    cachedIsMuted = isMuted;
-  }, [volume, isMuted, audioUrl]);
+        if (currentPlayingId !== audioUrl) {
+          setCurrentPlayingId(audioUrl);
+        }
+      }
 
-  const togglePlay = useCallback(() => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+      setIsPlaying(!isPlayingClone);
+    },
+    [audioUrl, currentPlayingId, isPlaying, setCurrentPlayingId]
+  );
 
   const toggleMute = useCallback(() => {
     if (!audioRef.current) return;
     audioRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
   }, [isMuted]);
+
+  const toggleRepeat = useCallback(() => {
+    setIsRepeating(!isRepeating);
+  }, [isRepeating]);
 
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,6 +121,46 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
     return duration ? (currentTime / duration) * 100 : 0;
   }, [currentTime, duration]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    audio.addEventListener("loadedmetadata", setAudioData);
+    audio.addEventListener("timeupdate", setAudioTime);
+    audio.addEventListener("ended", onEnded);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", setAudioData);
+      audio.removeEventListener("timeupdate", setAudioTime);
+      audio.removeEventListener("ended", onEnded);
+    };
+  }, [audioUrl, setAudioData, setAudioTime, onEnded]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+    cachedPlaybackRate = playbackRate;
+  }, [playbackRate, audioUrl]);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+      audioRef.current.loop = isRepeating;
+    }
+
+    cachedVolume = volume;
+    cachedIsMuted = isMuted;
+  }, [volume, isMuted, isRepeating, audioUrl]);
+
+  useEffect(() => {
+    if (currentPlayingId && currentPlayingId !== audioUrl && audioRef.current) {
+      togglePlay(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPlayingId]);
+
   return (
     <div
       className="w-full max-w-xl p-4 bg-white rounded-xl dark:bg-gray-800 transition-all"
@@ -167,7 +196,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
-              onClick={togglePlay}
+              onClick={() => togglePlay()}
               className="p-2 bg-gray-500 rounded-full text-white hover:bg-gray-600 transition-colors dark:bg-gray-600 dark:hover:bg-gray-500"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
@@ -201,7 +230,15 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
             />
           </div>
 
-          <div className="relative"></div>
+          <button
+            onClick={toggleRepeat}
+            className={`p-2 text-gray-600 transition-colors dark:text-gray-300 dark:hover:text-blue-400 ${
+              isRepeating ? "text-blue-500" : ""
+            }`}
+            aria-label={isRepeating ? "Disable Repeat" : "Enable Repeat"}
+          >
+            <Repeat size={16} />
+          </button>
         </div>
       </div>
       <div className="flex justify-center items-center mt-2 gap-2">
@@ -209,7 +246,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
           <button
             key={rate}
             onClick={() => handlePlaybackRateChange(rate)}
-            className={`px-3 py-1 text-xs rounded-md transition-colors ${
+            className={`px-2 py-1 text-xs rounded-md transition-colors ${
               playbackRate === rate
                 ? "bg-blue-500 text-white"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"

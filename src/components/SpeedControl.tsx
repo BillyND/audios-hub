@@ -29,7 +29,6 @@ const SpeedControl: React.FC<SpeedControlProps> = ({
         id="speedSlider"
         className="w-full"
         style={{
-          background: "black",
           cursor: "pointer",
         }}
         min="0.5"

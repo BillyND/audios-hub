@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useDebounce from "../hooks/useDebounce";
 
 interface TextSettingsProps {
@@ -23,17 +23,15 @@ const TextSettings: React.FC<TextSettingsProps> = ({
   isLoading,
 }) => {
   const [localText, setLocalText] = useState(text);
-  const [localIsOptimizeWithAI, setLocalIsOptimizeWithAI] =
-    useState(isOptimizeWithAI);
-
+  const [isOptimizeAIState, setIsOptimizeAIState] = useState(isOptimizeWithAI);
   const debouncedText = useDebounce(localText, 100);
-  const debouncedIsOptimizeWithAI = useDebounce(localIsOptimizeWithAI, 100);
+  const debouncedIsOptimizeWithAI = useDebounce(isOptimizeAIState, 100);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setText(debouncedText);
   }, [debouncedText, setText]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsOptimizeWithAI(debouncedIsOptimizeWithAI);
   }, [debouncedIsOptimizeWithAI, setIsOptimizeWithAI]);
 
@@ -77,9 +75,9 @@ const TextSettings: React.FC<TextSettingsProps> = ({
         <input
           type="checkbox"
           id="optimizeWithAI"
-          className="checkbox mt-1 mx-4"
-          checked={localIsOptimizeWithAI}
-          onChange={(e) => setLocalIsOptimizeWithAI(e.target.checked)}
+          className="checkbox w-4 h-4 mx-2"
+          checked={isOptimizeAIState}
+          onChange={(e) => setIsOptimizeAIState(e.target.checked)}
           disabled={isLoading}
         />
       </div>

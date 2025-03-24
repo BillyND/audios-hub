@@ -5,7 +5,10 @@ export const CACHE_CONFIG = {
   TTL: 10 * 60 * 1000, // 10 minutes in milliseconds
 };
 
-export const baseEndPoint = import.meta.env.VITE_BASE_END_POINT as string;
+export const baseEndPoint = import.meta.env.VITE_BASE_END_POINT.replace(
+  /\/$/,
+  ""
+) as string;
 
 export const LANGUAGES = {
   en: "English",

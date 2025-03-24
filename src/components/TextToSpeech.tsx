@@ -1,4 +1,3 @@
-import { useState } from "react";
 import useTTS from "../hooks/useTTS";
 import AudioPlayer from "./AudioPlayer";
 import GenerateButton from "./GenerateButton";
@@ -17,10 +16,11 @@ const TextToSpeech = () => {
     setLanguage,
     speed,
     setSpeed,
+    text,
+    setText,
+    isOptimizeWithAI,
+    setIsOptimizeWithAI,
   } = useTTS();
-
-  const [text, setText] = useState("");
-  const [isOptimizeWithAI, setIsOptimizeWithAI] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
