@@ -200,7 +200,7 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
             audioUrl,
             audioBinary: arrayBuffer,
             timestamp,
-            text: `Recording from ${new Date(timestamp).toLocaleString()}`,
+            text: `Rec ${new Date(timestamp).toLocaleString()}`,
           };
 
           try {
@@ -301,9 +301,7 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
           audioUrl,
           audioBinary: arrayBuffer,
           timestamp,
-          text: `Uploaded recording from ${new Date(
-            timestamp
-          ).toLocaleString()}`,
+          text: `Upload ${new Date(timestamp).toLocaleString()}`,
         };
 
         await addItem(dbConfig, "recordings", newItem);
