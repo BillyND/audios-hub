@@ -76,9 +76,7 @@ export const fetchTTSData = async (
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const blob = await response.blob();
-    const audioUrl = URL.createObjectURL(blob);
-    return { audioUrl };
+    return await response.blob();
   } catch (error) {
     console.error("Error fetching TTS:", error);
     const errorMessage =

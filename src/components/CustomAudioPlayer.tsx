@@ -1,4 +1,4 @@
-import { Pause, Play, Volume2, VolumeX, Repeat } from "lucide-react";
+import { Pause, Play, Volume2, VolumeX, Repeat, Download } from "lucide-react";
 import React, {
   useEffect,
   useRef,
@@ -10,13 +10,17 @@ import { useAudioStore } from "../store/audioStore";
 
 interface CustomAudioPlayerProps {
   audioUrl: string;
+  title?: string;
 }
 
 let cachedPlaybackRate: number = 1;
 let cachedVolume: number = 1;
 let cachedIsMuted: boolean = false;
 
-const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
+const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
+  title = "audio",
+  audioUrl,
+}) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { currentPlayingId, setCurrentPlayingId } = useAudioStore();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -106,6 +110,13 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
     if (!audioRef.current) return;
     setPlaybackRate(rate);
   }, []);
+
+  const handleDownload = useCallback(() => {
+    const link = document.createElement("a");
+    link.href = audioUrl;
+    link.download = `${title}-${Date.now()}.mp3`;
+    link.click();
+  }, [audioUrl, title]);
 
   const formatTime = useCallback((time: number): string => {
     if (isNaN(time)) return "00:00";
@@ -238,6 +249,14 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({ audioUrl }) => {
             aria-label={isRepeating ? "Disable Repeat" : "Enable Repeat"}
           >
             <Repeat size={16} />
+          </button>
+
+          <button
+            onClick={handleDownload}
+            className="p-2 text-gray-600 hover:text-blue-500 transition-colors dark:text-gray-300 dark:hover:text-blue-400"
+            aria-label="Download Audio"
+          >
+            <Download size={16} />
           </button>
         </div>
       </div>

@@ -29,11 +29,27 @@ const TextSettings: React.FC<TextSettingsProps> = ({
 
   useEffect(() => {
     setText(debouncedText);
-  }, [debouncedText, setText]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedText]);
+
+  useEffect(() => {
+    if (text !== debouncedText) {
+      setLocalText(text);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text]);
 
   useEffect(() => {
     setIsOptimizeWithAI(debouncedIsOptimizeWithAI);
-  }, [debouncedIsOptimizeWithAI, setIsOptimizeWithAI]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedIsOptimizeWithAI]);
+
+  useEffect(() => {
+    if (isOptimizeWithAI !== debouncedIsOptimizeWithAI) {
+      setIsOptimizeAIState(isOptimizeWithAI);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOptimizeWithAI]);
 
   return (
     <>
