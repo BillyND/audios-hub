@@ -1,10 +1,10 @@
-import { Pause, Play, Volume2, VolumeX, Repeat, Download } from "lucide-react";
+import { Download, Pause, Play, Repeat, Volume2, VolumeX } from "lucide-react";
 import React, {
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
 } from "react";
 import { useAudioStore } from "../store/audioStore";
 
@@ -44,13 +44,13 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
         console.log("Valid duration loaded:", audioDuration);
         setDuration(audioDuration);
       } else {
-        console.log("Invalid duration:", audioDuration);
-        setDuration(0); // Set duration to 0 if invalid
+        // Set duration to 0 if invalid
+        setDuration(0);
       }
     }
   }, []);
 
-  // Thêm một event handler riêng cho sự kiện durationchange
+  // Add a separate event handler for the durationchange event
   const onDurationChange = useCallback(() => {
     if (audioRef.current) {
       const audioDuration = audioRef.current.duration;
@@ -62,8 +62,8 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
         console.log("Duration changed to:", audioDuration);
         setDuration(audioDuration);
       } else {
-        console.log("Invalid duration:", audioDuration);
-        setDuration(0); // Set duration to 0 if invalid
+        // Set duration to 0 if invalid
+        setDuration(0);
       }
     }
   }, []);
@@ -159,14 +159,14 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
     return duration ? (currentTime / duration) * 100 : 0;
   }, [currentTime, duration]);
 
-  // Đảm bảo audio đang load
+  // Ensure audio is loading
   useEffect(() => {
     const loadAudio = () => {
       if (audioRef.current) {
-        // Đặt thuộc tính preload để đảm bảo tải metadata
+        // Set preload attribute to ensure metadata loads
         audioRef.current.preload = "metadata";
 
-        // Tải lại audio nếu cần thiết
+        // Reload audio if needed
         if (audioRef.current.readyState === 0) {
           audioRef.current.load();
         }
@@ -180,20 +180,20 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Thêm listener cho durationchange
+    // Add listener for durationchange
     audio.addEventListener("loadedmetadata", setAudioData);
     audio.addEventListener("durationchange", onDurationChange);
     audio.addEventListener("timeupdate", setAudioTime);
     audio.addEventListener("ended", onEnded);
 
-    // Thêm listener cho lỗi
+    // Add listener for errors
     const handleError = (e: ErrorEvent) => {
       console.error("Audio error:", e);
     };
 
     audio.addEventListener("error", handleError);
 
-    // Thử tải lại thông tin nếu audio đã sẵn sàng
+    // Retry loading info if audio is ready
     if (audio.readyState >= 1) {
       onDurationChange();
     }
@@ -239,7 +239,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
       className="w-full max-w-xl p-4 bg-white rounded-xl dark:bg-gray-800 transition-all"
       style={{
         boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
-        margin: "2px",
+        marginTop: "2px",
       }}
     >
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
