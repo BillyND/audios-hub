@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 
 interface UseAudioRecorderResult {
@@ -170,12 +170,12 @@ const clearRecordings = async (): Promise<void> => {
 };
 
 const useAudioRecorder = (): UseAudioRecorderResult => {
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState<RecordingItem[]>([]);
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
 
   // Initialize the database and load initial data
   useEffect(() => {
@@ -199,53 +199,154 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
           URL.revokeObjectURL(item.audioUrl);
         }
       });
+
+      // Ensure any active stream is stopped
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
+    // Don't allow starting a new recording if one is in progress
+    if (isRecording) {
+      toast.error("Recording already in progress");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      // Get audio stream with a more robust error handler
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
 
-      setAudioChunks([]);
+      // Store stream reference to clean up later
+      streamRef.current = stream;
 
+      // Reset audio chunks before starting
+      audioChunksRef.current = [];
+
+      // Set options for better compatibility across browsers
+      const options = {
+        mimeType: "audio/webm;codecs=opus",
+      };
+
+      // Try to create MediaRecorder with preferred options, fall back if not supported
+      let recorder: MediaRecorder;
+      try {
+        recorder = new MediaRecorder(stream, options);
+      } catch (e) {
+        console.warn("Preferred MIME type not supported, using default", e);
+        recorder = new MediaRecorder(stream);
+      }
+
+      // Handle data available event
       recorder.ondataavailable = (event) => {
         if (event.data && event.data.size > 0) {
-          setAudioChunks((prev) => [...prev, event.data]);
-        } else {
-          console.error(
-            "Received undefined or empty data in ondataavailable event:",
-            event
-          );
+          audioChunksRef.current.push(event.data);
         }
       };
 
-      recorder.start();
-      setMediaRecorder(recorder);
+      // Error handler for MediaRecorder
+      recorder.onerror = (event) => {
+        console.error("MediaRecorder error:", event);
+        toast.error("Recording error occurred");
+        cleanupRecording();
+      };
+
+      // Store recorder reference
+      mediaRecorderRef.current = recorder;
+
+      // Start recording with 10ms time slices for more frequent ondataavailable events
+      recorder.start(1000);
       setIsRecording(true);
       toast.success("Recording started");
     } catch (error) {
       console.error("Error starting recording:", error);
-      toast.error(
-        "Failed to start recording. Please check microphone permissions."
-      );
-    }
-  };
 
-  const stopRecording = async () => {
-    if (!mediaRecorder) {
-      toast.error("No active recording");
-      return;
+      // More specific error messages based on error type
+      if (error instanceof DOMException && error.name === "NotAllowedError") {
+        toast.error("Microphone access denied. Please check permissions.");
+      } else if (
+        error instanceof DOMException &&
+        error.name === "NotFoundError"
+      ) {
+        toast.error("No microphone detected on your device.");
+      } else {
+        toast.error(
+          "Failed to start recording. Please check microphone access."
+        );
+      }
+
+      cleanupRecording();
+    }
+  }, [isRecording]);
+
+  // Cleanup function to handle stopping streams and resetting state
+  const cleanupRecording = useCallback(() => {
+    // Stop all tracks on the stream if exists
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+
+    // Reset recorder
+    mediaRecorderRef.current = null;
+    setIsRecording(false);
+  }, []);
+
+  const stopRecording = useCallback(async () => {
+    const recorder = mediaRecorderRef.current;
+
+    if (!recorder || recorder.state === "inactive") {
+      toast.error("No active recording to stop");
+      return Promise.resolve();
     }
 
     return new Promise<void>((resolve) => {
-      mediaRecorder.onstop = async () => {
+      recorder.onstop = async () => {
         try {
-          const audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-          const arrayBuffer = await audioBlob.arrayBuffer();
-          const audioUrl = URL.createObjectURL(audioBlob);
+          if (audioChunksRef.current.length === 0) {
+            toast.error("No audio data captured");
+            cleanupRecording();
+            resolve();
+            return;
+          }
 
+          // Determine best format based on browser support
+          const mimeType = recorder.mimeType || "audio/webm";
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: mimeType,
+          });
+
+          // Validate blob size
+          if (audioBlob.size === 0) {
+            toast.error("Recorded audio is empty");
+            cleanupRecording();
+            resolve();
+            return;
+          }
+
+          // Convert blob to array buffer with proper error handling
+          let arrayBuffer: ArrayBuffer;
+          try {
+            arrayBuffer = await audioBlob.arrayBuffer();
+          } catch (error) {
+            console.error(
+              "Failed to convert audio blob to array buffer:",
+              error
+            );
+            toast.error("Failed to process recording");
+            cleanupRecording();
+            resolve();
+            return;
+          }
+
+          const audioUrl = URL.createObjectURL(audioBlob);
           const timestamp = Date.now();
           const formattedDate = new Date(timestamp).toLocaleString();
 
@@ -262,61 +363,69 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
             // Save to IndexedDB
             await addRecording(newItem);
 
-            // Update state
+            // Update state with functional update to avoid stale state issues
             setRecordings((prevRecordings) => [newItem, ...prevRecordings]);
             toast.success("Recording saved");
           } catch (error) {
             console.error("Failed to save recording:", error);
             toast.error("Failed to save recording");
+            // Make sure to revoke the URL if saving fails
+            URL.revokeObjectURL(audioUrl);
           }
 
-          // Stop all tracks on the stream
-          mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-
-          setIsRecording(false);
-          setMediaRecorder(null);
+          cleanupRecording();
           resolve();
         } catch (error) {
           console.error("Error processing recording:", error);
           toast.error("Failed to process recording");
-          setIsRecording(false);
-          setMediaRecorder(null);
+          cleanupRecording();
           resolve();
         }
       };
 
-      mediaRecorder.stop();
+      // Sometimes stop() can throw if there's an issue with the recorder state
+      try {
+        recorder.stop();
+      } catch (error) {
+        console.error("Error stopping MediaRecorder:", error);
+        toast.error("Failed to stop recording properly");
+        cleanupRecording();
+        resolve();
+      }
     });
-  };
+  }, [cleanupRecording]);
 
-  const deleteRecording = async (id: string) => {
-    if (!id) {
-      console.error("Invalid ID provided for deletion");
-      return;
-    }
-
-    try {
-      // First find the item to get its URL for revocation
-      const itemToDelete = recordings.find((item) => item.id === id);
-      if (itemToDelete && itemToDelete.audioUrl) {
-        URL.revokeObjectURL(itemToDelete.audioUrl);
+  const deleteRecording = useCallback(
+    async (id: string) => {
+      if (!id) {
+        console.error("Invalid ID provided for deletion");
+        return;
       }
 
-      // Delete from IndexedDB
-      await deleteRecordingFromDB(id);
+      try {
+        // First find the item to get its URL for revocation
+        const itemToDelete = recordings.find((item) => item.id === id);
+        if (itemToDelete && itemToDelete.audioUrl) {
+          URL.revokeObjectURL(itemToDelete.audioUrl);
+        }
 
-      // Update state
-      setRecordings((prevRecordings) =>
-        prevRecordings.filter((item) => item.id !== id)
-      );
-      toast.success("Recording deleted");
-    } catch (error) {
-      console.error(`Failed to delete recording with ID ${id}:`, error);
-      toast.error("Failed to delete recording");
-    }
-  };
+        // Delete from IndexedDB
+        await deleteRecordingFromDB(id);
 
-  const clearAllRecordings = async () => {
+        // Update state with functional update
+        setRecordings((prevRecordings) =>
+          prevRecordings.filter((item) => item.id !== id)
+        );
+        toast.success("Recording deleted");
+      } catch (error) {
+        console.error(`Failed to delete recording with ID ${id}:`, error);
+        toast.error("Failed to delete recording");
+      }
+    },
+    [recordings]
+  );
+
+  const clearAllRecordings = useCallback(async () => {
     try {
       // Release object URLs to prevent memory leaks
       recordings.forEach((item) => {
@@ -335,7 +444,7 @@ const useAudioRecorder = (): UseAudioRecorderResult => {
       console.error("Failed to clear recordings:", error);
       toast.error("Failed to clear recordings");
     }
-  };
+  }, [recordings]);
 
   return {
     startRecording,
