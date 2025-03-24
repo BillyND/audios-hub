@@ -34,7 +34,37 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
   // Memoized event handlers for audio element
   const setAudioData = useCallback(() => {
     if (audioRef.current) {
-      setDuration(audioRef.current.duration);
+      const audioDuration = audioRef.current.duration;
+      // Check if the duration is valid, NaN, or Infinity here
+      if (
+        !isNaN(audioDuration) &&
+        isFinite(audioDuration) &&
+        audioDuration > 0
+      ) {
+        console.log("Valid duration loaded:", audioDuration);
+        setDuration(audioDuration);
+      } else {
+        console.log("Invalid duration:", audioDuration);
+        setDuration(0); // Set duration to 0 if invalid
+      }
+    }
+  }, []);
+
+  // Thêm một event handler riêng cho sự kiện durationchange
+  const onDurationChange = useCallback(() => {
+    if (audioRef.current) {
+      const audioDuration = audioRef.current.duration;
+      if (
+        !isNaN(audioDuration) &&
+        isFinite(audioDuration) &&
+        audioDuration > 0
+      ) {
+        console.log("Duration changed to:", audioDuration);
+        setDuration(audioDuration);
+      } else {
+        console.log("Invalid duration:", audioDuration);
+        setDuration(0); // Set duration to 0 if invalid
+      }
     }
   }, []);
 
@@ -51,27 +81,22 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
   const togglePlay = useCallback(
     (forcePlay?: boolean) => {
-      if (!audioRef.current) return;
-
-      let isPlayingClone = isPlaying;
-
-      if (typeof forcePlay === "boolean") {
-        isPlayingClone = !forcePlay;
+      if (!audioRef.current) {
+        return;
       }
 
-      if (isPlayingClone) {
-        audioRef.current.pause();
-      } else {
+      const shouldPlay =
+        typeof forcePlay === "boolean" ? forcePlay : !isPlaying;
+
+      if (shouldPlay) {
         audioRef.current.play();
-
-        if (currentPlayingId !== audioUrl) {
-          setCurrentPlayingId(audioUrl);
-        }
+        setCurrentPlayingId(audioUrl);
+      } else {
+        audioRef.current.pause();
       }
-
-      setIsPlaying(!isPlayingClone);
+      setIsPlaying(shouldPlay);
     },
-    [audioUrl, currentPlayingId, isPlaying, setCurrentPlayingId]
+    [audioUrl, isPlaying, setCurrentPlayingId]
   );
 
   const toggleMute = useCallback(() => {
@@ -90,6 +115,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
       if (!audioRef.current) return;
 
       setVolume(value);
+      audioRef.current.volume = value;
       setIsMuted(value === 0);
     },
     []
@@ -108,6 +134,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
   const handlePlaybackRateChange = useCallback((rate: number) => {
     if (!audioRef.current) return;
+    audioRef.current.playbackRate = rate;
     setPlaybackRate(rate);
   }, []);
 
@@ -132,27 +159,60 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
     return duration ? (currentTime / duration) * 100 : 0;
   }, [currentTime, duration]);
 
+  // Đảm bảo audio đang load
+  useEffect(() => {
+    const loadAudio = () => {
+      if (audioRef.current) {
+        // Đặt thuộc tính preload để đảm bảo tải metadata
+        audioRef.current.preload = "metadata";
+
+        // Tải lại audio nếu cần thiết
+        if (audioRef.current.readyState === 0) {
+          audioRef.current.load();
+        }
+      }
+    };
+
+    loadAudio();
+  }, [audioUrl]);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // Thêm listener cho durationchange
     audio.addEventListener("loadedmetadata", setAudioData);
+    audio.addEventListener("durationchange", onDurationChange);
     audio.addEventListener("timeupdate", setAudioTime);
     audio.addEventListener("ended", onEnded);
 
+    // Thêm listener cho lỗi
+    const handleError = (e: ErrorEvent) => {
+      console.error("Audio error:", e);
+    };
+
+    audio.addEventListener("error", handleError);
+
+    // Thử tải lại thông tin nếu audio đã sẵn sàng
+    if (audio.readyState >= 1) {
+      onDurationChange();
+    }
+
     return () => {
       audio.removeEventListener("loadedmetadata", setAudioData);
+      audio.removeEventListener("durationchange", onDurationChange);
       audio.removeEventListener("timeupdate", setAudioTime);
       audio.removeEventListener("ended", onEnded);
+      audio.removeEventListener("error", handleError);
     };
-  }, [audioUrl, setAudioData, setAudioTime, onEnded]);
+  }, [audioUrl, setAudioData, setAudioTime, onEnded, onDurationChange]);
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.playbackRate = playbackRate;
     }
     cachedPlaybackRate = playbackRate;
-  }, [playbackRate, audioUrl]);
+  }, [playbackRate]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -163,14 +223,16 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
     cachedVolume = volume;
     cachedIsMuted = isMuted;
-  }, [volume, isMuted, isRepeating, audioUrl]);
+  }, [volume, isMuted, isRepeating]);
 
   useEffect(() => {
     if (currentPlayingId && currentPlayingId !== audioUrl && audioRef.current) {
-      togglePlay(false);
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPlayingId]);
+  }, [currentPlayingId, audioUrl, isPlaying]);
 
   return (
     <div
