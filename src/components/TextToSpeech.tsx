@@ -1,3 +1,4 @@
+import { useBreakpoints } from "../hooks/useBreakpoints";
 import useTTS from "../hooks/useTTS";
 import AudioPlayer from "./AudioPlayer";
 import GenerateButton from "./GenerateButton";
@@ -6,10 +7,13 @@ import SpeedControl from "./SpeedControl";
 import TextSettings from "./TextSettings";
 
 const TextToSpeech = () => {
+  const { isMobile } = useBreakpoints();
+
   const {
     generateSpeech,
     audioUrl,
     history,
+    setHistory,
     languages,
     isLoading,
     language,
@@ -28,12 +32,13 @@ const TextToSpeech = () => {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div
             className="flex flex-col md:flex-row gap-6 content-wrapper p-4"
-            style={{ maxHeight: "95vh" }}
+            style={isMobile ? {} : { maxHeight: "90vdh" }}
           >
             {/* Left Panel (TTS) */}
             <div
               id="tts-panel"
-              className="md:w-2/3 flex flex-col overflow-y-auto"
+              className="md:w-2/3 flex flex-col"
+              // className="md:w-2/3 flex flex-col overflow-y-auto"
             >
               <TextSettings
                 text={text}
@@ -58,7 +63,7 @@ const TextToSpeech = () => {
             </div>
 
             {/* Right Panel (History) */}
-            <HistoryPanel history={history} />
+            <HistoryPanel history={history} setHistory={setHistory} />
           </div>
         </div>
       </div>

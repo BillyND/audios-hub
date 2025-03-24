@@ -66,9 +66,9 @@ function App() {
         containerClassName="toast-container"
         gutter={8}
       />
-      <div className="max-w-5xl mx-auto p-4 sm:p-6 pt-0">
+      <div className="max-w-5xl mx-auto p-0 sm:p-6 sm:pt-0 pt-0">
         <div
-          className="flex gap-4 mb-4"
+          className="flex gap-4 px-4"
           style={{
             position: "sticky",
             top: 0,

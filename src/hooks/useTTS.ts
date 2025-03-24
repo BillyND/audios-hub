@@ -11,6 +11,7 @@ interface UseTTSResult {
   generateSpeech: (text: string, isOptimizeWithAI: boolean) => Promise<void>;
   audioUrl: string | null;
   history: TTSHistoryItem[];
+  setHistory: Dispatch<React.SetStateAction<TTSHistoryItem[]>>;
   languages: LanguageOption[];
   isLoading: boolean;
   language: string;
@@ -110,6 +111,7 @@ const useTTS = (): UseTTSResult => {
     generateSpeech,
     audioUrl,
     history,
+    setHistory,
     languages,
     isLoading,
     language,
