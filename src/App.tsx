@@ -6,13 +6,17 @@ import AudioRecorderPanel from "./components/AudioRecorderPanel";
 
 enum Tab {
   TTS = "tts",
-  LOOP_MP3 = "loop_mp3",
+  AUDIO_RECORDER = "audio_recorder",
 }
 
+const getDefaultTab = (): Tab => {
+  const urlSearchParams = new URLSearchParams(window.location.search);
+  const tabFromUrl = urlSearchParams.get("tab") as Tab;
+  return Object.values(Tab).includes(tabFromUrl) ? tabFromUrl : Tab.TTS;
+};
+
 function App() {
-  const [activeTab, setActiveTab] = useState<Tab>(
-    (new URLSearchParams(window.location.search).get("tab") as Tab) || Tab.TTS
-  );
+  const [activeTab, setActiveTab] = useState<Tab>(getDefaultTab);
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -23,9 +27,26 @@ function App() {
   const tabComponents = useMemo(
     () => ({
       [Tab.TTS]: <TextToSpeech />,
-      [Tab.LOOP_MP3]: <AudioRecorderPanel />,
+      [Tab.AUDIO_RECORDER]: <AudioRecorderPanel />,
     }),
     []
+  );
+
+  const renderTabButton = useMemo(
+    () => (tab: Tab, label: string) =>
+      (
+        <button
+          className={`tab-btn flex-1 py-2 text-center rounded-md ${
+            activeTab === tab
+              ? "bg-black text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+          onClick={() => setActiveTab(tab)}
+        >
+          {label}
+        </button>
+      ),
+    [activeTab]
   );
 
   return (
@@ -86,36 +107,8 @@ function App() {
             boxShadow: "0 6px 8px -4px rgba(0, 0, 0, 0.05)",
           }}
         >
-          {/* <button
-            className={`tab-btn flex-1 py-2 text-center rounded-md ${
-              activeTab === Tab.NEWS
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTab(Tab.NEWS)}
-          >
-            News Media
-          </button> */}
-          <button
-            className={`tab-btn flex-1 py-2 text-center rounded-md ${
-              activeTab === Tab.TTS
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTab(Tab.TTS)}
-          >
-            Text to Speech
-          </button>
-          <button
-            className={`tab-btn flex-1 py-2 text-center rounded-md ${
-              activeTab === Tab.LOOP_MP3
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            onClick={() => setActiveTab(Tab.LOOP_MP3)}
-          >
-            Audio Recorder
-          </button>
+          {renderTabButton(Tab.TTS, "Text to Speech")}
+          {renderTabButton(Tab.AUDIO_RECORDER, "Audio Recorder")}
         </div>
         {tabComponents[activeTab]}
       </div>
