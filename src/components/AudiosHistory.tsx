@@ -1,19 +1,15 @@
 import { Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useBreakpoints } from "../hooks/useBreakpoints";
-import { RecordingItem } from "../hooks/useAudioRecorder";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import Modal from "./Modal";
 
-interface RecordingsPanelProps {
-  recordings: RecordingItem[];
-  deleteRecording: (id: string) => Promise<void>;
+interface AudiosHistoryProps {
+  items: { id: string; text: string; audioUrl: string }[];
+  deleteItem: (id: string) => Promise<void>;
 }
 
-const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
-  recordings,
-  deleteRecording,
-}) => {
+const AudiosHistory: React.FC<AudiosHistoryProps> = ({ items, deleteItem }) => {
   const { isMobile } = useBreakpoints();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pendingDeletionId, setPendingDeletionId] = useState<string | null>(
@@ -21,16 +17,14 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
   );
 
   const handleDelete = async (id: string) => {
-    const itemToDelete = recordings.find((item) => item.id === id);
+    const itemToDelete = items.find((item) => item.id === id);
     if (!itemToDelete) {
       console.error("No item found with id:", id);
       return;
     }
 
-    console.log("Deleting item:", itemToDelete);
-
     try {
-      await deleteRecording(id);
+      await deleteItem(id);
     } catch (error) {
       console.error("Failed to delete item:", error);
     }
@@ -45,17 +39,19 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
 
   return (
     <div
-      id="recordings-panel"
+      id="audios-history"
       className="md:w-1/3 flex flex-col"
       style={isMobile ? {} : { height: "calc(100dvh - 170px)" }}
     >
-      <h3 className="text-lg font-semibold mb-1">Recordings</h3>
-      <div id="recordingsContainer" className="space-y-3 md:overflow-y-auto">
-        {recordings.map((item) => {
+      <h3 className="text-lg font-semibold mb-1">Audios History</h3>
+      <div id="itemsContainer" className="space-y-3 md:overflow-y-auto">
+        {items.map((item) => {
+          const truncatedText =
+            item.text.length > 50 ? item.text.slice(0, 50) + "..." : item.text;
           return (
             <div
               key={item.id}
-              className="p-3 bg-gray-100 rounded-md flex justify-between align-items-start"
+              className="p-3 bg-gray-100 rounded-md flex justify-between align-items-start w-full"
             >
               <div className="w-full">
                 <div className="flex justify-between gap-2">
@@ -63,7 +59,7 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
                     className="text-sm text-gray-700"
                     style={{ wordBreak: "break-word" }}
                   >
-                    {item.text}
+                    {truncatedText}
                   </p>
 
                   <button
@@ -73,14 +69,17 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
                     <Trash2 width={16} height={16} />
                   </button>
                 </div>
-                <CustomAudioPlayer audioUrl={item.audioUrl} title={item.text} />
+                <CustomAudioPlayer
+                  audioUrl={item.audioUrl}
+                  title={truncatedText}
+                />
               </div>
             </div>
           );
         })}
-        {recordings.length === 0 && (
+        {items.length === 0 && (
           <div className="text-center text-gray-500 py-4">
-            No recordings yet. Click the record button to start recording.
+            No items yet. Click the record button to start recording.
           </div>
         )}
       </div>
@@ -90,7 +89,7 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
         title="Confirm Deletion"
         content={
           <div className="flex flex-col items-center">
-            <p>Are you sure you want to delete this recording?</p>
+            <p>Are you sure you want to delete this item?</p>
 
             <div className="mt-4 flex justify-end gap-3">
               <button
@@ -116,4 +115,4 @@ const RecordingsPanel: React.FC<RecordingsPanelProps> = ({
   );
 };
 
-export default RecordingsPanel;
+export default AudiosHistory;

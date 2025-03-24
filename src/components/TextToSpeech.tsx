@@ -2,7 +2,7 @@ import { useBreakpoints } from "../hooks/useBreakpoints";
 import useTTS from "../hooks/useTTS";
 import AudioPlayer from "./AudioPlayer";
 import GenerateButton from "./GenerateButton";
-import HistoryPanel from "./HistoryPanel";
+import AudiosHistory from "./AudiosHistory";
 import SpeedControl from "./SpeedControl";
 import TextSettings from "./TextSettings";
 
@@ -25,8 +25,6 @@ const TextToSpeech = () => {
     isOptimizeWithAI,
     setIsOptimizeWithAI,
   } = useTTS();
-
-  console.log("===>history", history);
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">
@@ -61,10 +59,7 @@ const TextToSpeech = () => {
             </div>
 
             {/* Right Panel (History) */}
-            <HistoryPanel
-              history={history}
-              deleteHistoryItem={deleteHistoryItem}
-            />
+            <AudiosHistory items={history} deleteItem={deleteHistoryItem} />
           </div>
         </div>
       </div>

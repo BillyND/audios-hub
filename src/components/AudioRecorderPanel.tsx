@@ -1,7 +1,7 @@
-import { useBreakpoints } from "../hooks/useBreakpoints";
 import useAudioRecorder from "../hooks/useAudioRecorder";
+import { useBreakpoints } from "../hooks/useBreakpoints";
+import AudiosHistory from "./AudiosHistory";
 import RecordButton from "./RecordButton";
-import HistoryPanel from "./HistoryPanel";
 
 const AudioRecorderPanel = () => {
   const { isMobile } = useBreakpoints();
@@ -11,7 +11,6 @@ const AudioRecorderPanel = () => {
     isRecording,
     recordings,
     deleteRecording,
-    clearAllRecordings,
   } = useAudioRecorder();
 
   return (
@@ -36,24 +35,10 @@ const AudioRecorderPanel = () => {
                   isRecording={isRecording}
                 />
               </div>
-
-              {recordings.length > 0 && (
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={clearAllRecordings}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Clear All Recordings
-                  </button>
-                </div>
-              )}
             </div>
 
             {/* Right Panel (History) */}
-            <HistoryPanel
-              history={recordings}
-              deleteHistoryItem={deleteRecording}
-            />
+            <AudiosHistory items={recordings} deleteItem={deleteRecording} />
           </div>
         </div>
       </div>
