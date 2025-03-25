@@ -57,11 +57,7 @@ export const initDB = (config: DBConfig): Promise<IDBDatabase> => {
 
       storeNames.forEach((storeName) => {
         if (!db.objectStoreNames.contains(storeName)) {
-          const store = db.createObjectStore(storeName, { keyPath: "id" });
-          // Create an index for specific stores if required
-          if (storeName === "ttsSettings") {
-            store.createIndex("languageIndex", "language", { unique: false });
-          }
+          db.createObjectStore(storeName, { keyPath: "id" });
         }
       });
     };
@@ -177,7 +173,8 @@ export const loadItems = async <T>(
 
 export const clearStore = async (
   config: DBConfig,
-  storeName: string
+  storeName: string,
+  showSuccessToast: boolean = true
 ): Promise<void> => {
   try {
     const db = await initDB(config);
@@ -188,8 +185,10 @@ export const clearStore = async (
       const request = store.clear();
 
       request.onsuccess = () => {
+        if (showSuccessToast) {
+          toast.success(`All items in ${storeName} cleared`);
+        }
         resolve();
-        toast.success(`All items in ${storeName} cleared`);
       };
 
       request.onerror = (event) => {

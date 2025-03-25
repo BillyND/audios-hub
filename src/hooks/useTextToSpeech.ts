@@ -16,7 +16,7 @@ import {
 const DB_CONFIG = {
   dbName: "ttsDatabase",
   storeNames: ["ttsHistory", "ttsSettings"] as string[],
-  dbVersion: 1,
+  dbVersion: 2, // Increment version to trigger schema update
 };
 
 // Split interfaces for better organization
@@ -67,6 +67,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [history, setHistory] = useState<TTSHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
 
   // Memoized state setters
   const setLanguage = useCallback((value: React.SetStateAction<string>) => {
@@ -140,7 +141,9 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
         }
       } catch (error) {
         console.error("Failed to initialize:", error);
-        toast.error("Failed to load saved audios");
+        toast.error("Failed to load saved settings and history");
+      } finally {
+        setIsInitializing(false);
       }
     };
 
@@ -159,9 +162,13 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
 
   // Save settings
   const saveSettings = useCallback(async () => {
+    if (isInitializing) return;
     try {
+      // Clear existing settings first (silently)
+      await clearStore(DB_CONFIG, "ttsSettings", false);
+      // Save new settings
       await addItem(DB_CONFIG, "ttsSettings", {
-        id: "1",
+        id: 1,
         language: state.language,
         speed: state.speed,
         text: state.text,
@@ -169,8 +176,9 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
       });
     } catch (error) {
       console.error("Failed to save settings:", error);
+      toast.error("Failed to save settings");
     }
-  }, [state]);
+  }, [state, isInitializing]);
 
   // Auto-save settings on change
   useEffect(() => {
