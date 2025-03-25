@@ -1,5 +1,5 @@
 import { useBreakpoints } from "../hooks/useBreakpoints";
-import useTTS from "../hooks/useTTS";
+import useTextToSpeech from "../hooks/useTextToSpeech";
 import AudioPlayer from "./AudioPlayer";
 import GenerateButton from "./GenerateButton";
 import AudiosHistory from "./AudiosHistory";
@@ -24,7 +24,7 @@ const TextToSpeech = () => {
     setText,
     isOptimizeWithAI,
     setIsOptimizeWithAI,
-  } = useTTS();
+  } = useTextToSpeech();
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg">

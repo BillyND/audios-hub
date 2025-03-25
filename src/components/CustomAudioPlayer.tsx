@@ -41,7 +41,6 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
         isFinite(audioDuration) &&
         audioDuration > 0
       ) {
-        console.log("Valid duration loaded:", audioDuration);
         setDuration(audioDuration);
       } else {
         // Set duration to 0 if invalid
@@ -59,7 +58,6 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
         isFinite(audioDuration) &&
         audioDuration > 0
       ) {
-        console.log("Duration changed to:", audioDuration);
         setDuration(audioDuration);
       } else {
         // Set duration to 0 if invalid
