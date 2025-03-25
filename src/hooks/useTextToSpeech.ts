@@ -1,6 +1,6 @@
 import { Dispatch, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { fetchTTSData } from "../api/newsApi";
+import { fetchTTSData } from "../api/audiosApi";
 import { LANGUAGES } from "../constants";
 import {
   TTSHistoryItem,

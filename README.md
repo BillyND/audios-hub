@@ -1,48 +1,81 @@
-# Newspeak
+# VoiceHub
 
-Newspeak is a web application designed to provide users with a seamless experience for managing and interacting with audio content. Built with modern web technologies, it offers a range of features to enhance user engagement.
+VoiceHub is a modern web application that combines powerful text-to-speech and audio recording capabilities in one intuitive interface. Built with React and TypeScript, it offers a comprehensive solution for audio content creation and management.
+
+## Key Features
+
+### Text-to-Speech
+
+- Multiple language support with AI-powered text optimization
+- Adjustable speech speed control
+- Audio history management
+- Real-time audio playback
+
+### Audio Recording
+
+- High-quality audio recording capabilities
+- Drag-and-drop file upload support
+- Support for multiple audio formats
+- Comprehensive recording history
+
+## Technical Stack
+
+- **Frontend**: React with TypeScript
+- **Styling**: Tailwind CSS for responsive design
+- **State Management**: Zustand
+- **UI Components**: HeroIcons and Lucide React
+- **Notifications**: React Hot Toast
+- **File Handling**: JSZip and FileSaver
+- **Build Tool**: Vite
 
 ## Installation
-
-To set up the project locally, follow these steps:
 
 1. Clone the repository:
 
    ```bash
    git clone [repository-url]
-   cd newspeak
+   cd voicehub
    ```
 
-2. Install the dependencies:
+2. Install dependencies:
+
    ```bash
    npm install
    ```
 
-## Usage
+3. Create a `.env` file based on `.env.example` and configure your environment variables.
 
-To start the development server, run:
+## Development
+
+Start the development server:
 
 ```bash
 npm run dev
 ```
 
-To build the project for production, use:
+## Building for Production
+
+Build the project:
 
 ```bash
 npm run build
 ```
 
-## Features
+## Project Structure
 
-- Audio recording and playback
-- Integration with external audio services
-- Responsive design with Tailwind CSS
-- State management using Zustand
-- Notifications with React Hot Toast
+```
+src/
+├── api/          # API integration
+├── components/   # React components
+├── hooks/        # Custom React hooks
+├── libs/         # Utility libraries
+├── services/     # Application services
+└── store/        # State management
+```
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
