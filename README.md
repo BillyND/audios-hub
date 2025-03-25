@@ -1,40 +1,49 @@
-# News Media Dashboard
+# Newspeak
 
-## Description
+Newspeak is a web application designed to provide users with a seamless experience for managing and interacting with audio content. Built with modern web technologies, it offers a range of features to enhance user engagement.
 
-This web application displays news from various media sources and provides text-to-speech functionality.
+## Installation
 
-## Technologies Used
+To set up the project locally, follow these steps:
 
-- React
-- TypeScript
-- Tailwind CSS
-- Vite
+1. Clone the repository:
 
-## API
+   ```bash
+   git clone [repository-url]
+   cd newspeak
+   ```
 
-The application uses the API endpoint defined by the `VITE_BASE_END_POINT` environment variable.
+2. Install the dependencies:
+   ```bash
+   npm install
+   ```
 
-## Key Features
+## Usage
 
-- News media dashboard
-- Text-to-speech functionality
-- Customizable text settings (speed, pitch, etc.)
-- News history
-- Pagination
+To start the development server, run:
 
-## Setup Instructions
+```bash
+npm run dev
+```
 
-1. Clone the repository.
-2. Install dependencies using `npm install`.
-3. Configure the environment variables. You need to set the `VITE_BASE_END_POINT` environment variable to the API endpoint.
-4. Run the development server using `npm run dev`.
+To build the project for production, use:
 
-## Contribution Guidelines
+```bash
+npm run build
+```
 
-Contributions are welcome! Please follow these guidelines:
+## Features
 
-- Fork the repository.
-- Create a new branch for your feature or bug fix.
-- Make your changes and commit them with clear, concise messages.
-- Submit a pull request.
+- Audio recording and playback
+- Integration with external audio services
+- Responsive design with Tailwind CSS
+- State management using Zustand
+- Notifications with React Hot Toast
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License.
