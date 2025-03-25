@@ -1,7 +1,7 @@
 export const ITEMS_PER_PAGE = 10;
 
 export const CACHE_CONFIG = {
-  PREFIX: "newsData_",
+  PREFIX: "audioData_",
   TTL: 10 * 60 * 1000, // 10 minutes in milliseconds
 };
 

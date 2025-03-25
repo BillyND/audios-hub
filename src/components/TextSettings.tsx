@@ -64,7 +64,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
           disabled={isLoading}
         ></textarea>
       </div>
-      <div className="mt-4">
+      <div>
         <label className="block text-gray-700 mb-2">Select Language:</label>
         <select
           id="languageSelect"
@@ -81,7 +81,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
             ))}
         </select>
       </div>
-      <div className="mt-4 flex items-center">
+      {/* <div className="mt-4 flex items-center">
         <label
           htmlFor="optimizeWithAI"
           className="block text-gray-700 cursor-pointer"
@@ -96,7 +96,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
           onChange={(e) => setIsOptimizeAIState(e.target.checked)}
           disabled={isLoading}
         />
-      </div>
+      </div> */}
     </>
   );
 };
