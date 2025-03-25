@@ -15,9 +15,9 @@ interface TextSettingsProps {
 const TextSettings: React.FC<TextSettingsProps> = ({
   text,
   setText,
-  language,
-  setLanguage,
-  languages,
+  // language,
+  // setLanguage,
+  // languages,
   isOptimizeWithAI,
   setIsOptimizeWithAI,
   isLoading,
@@ -64,7 +64,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
           disabled={isLoading}
         ></textarea>
       </div>
-      <div>
+      {/* <div>
         <label className="block text-gray-700 mb-2">Select Language:</label>
         <select
           id="languageSelect"
@@ -80,7 +80,7 @@ const TextSettings: React.FC<TextSettingsProps> = ({
               </option>
             ))}
         </select>
-      </div>
+      </div> */}
       {/* <div className="mt-4 flex items-center">
         <label
           htmlFor="optimizeWithAI"

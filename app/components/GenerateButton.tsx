@@ -12,7 +12,7 @@ const GenerateButton: React.FC<GenerateButtonProps> = ({
   return (
     <button
       id="generateButton"
-      className={`mt-4 w-full p-3 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg transition flex items-center justify-center ${
+      className={`w-full p-3 bg-black hover:bg-gray-800 text-white font-semibold rounded-lg transition flex items-center justify-center ${
         isLoading ? "opacity-50 cursor-not-allowed" : ""
       }`}
       onClick={generateSpeech}
