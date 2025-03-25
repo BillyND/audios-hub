@@ -1,15 +1,14 @@
 import { Dispatch, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { fetchTTSData } from "../api/audiosApi";
 import { LANGUAGES } from "../constants";
 import {
+  LanguageOption,
   TTSHistoryItem,
   TTSSettings,
-  LanguageOption,
   addItem,
+  clearStore,
   deleteItem,
   loadItems,
-  clearStore,
 } from "../libs/indexedDBHelpers";
 
 // Database configuration
@@ -22,14 +21,12 @@ const DB_CONFIG = {
 // Split interfaces for better organization
 interface TTSState {
   language: string;
-  speed: number;
   text: string;
   isOptimizeWithAI: boolean;
 }
 
 interface TTSControls {
   setLanguage: Dispatch<React.SetStateAction<string>>;
-  setSpeed: Dispatch<React.SetStateAction<number>>;
   setText: Dispatch<React.SetStateAction<string>>;
   setIsOptimizeWithAI: Dispatch<React.SetStateAction<boolean>>;
 }
@@ -59,7 +56,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
   // Group related states
   const [state, setState] = useState<TTSState>({
     language: "en",
-    speed: 1,
     text: "",
     isOptimizeWithAI: false,
   });
@@ -74,13 +70,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     setState((prev) => ({
       ...prev,
       language: typeof value === "function" ? value(prev.language) : value,
-    }));
-  }, []);
-
-  const setSpeed = useCallback((value: React.SetStateAction<number>) => {
-    setState((prev) => ({
-      ...prev,
-      speed: typeof value === "function" ? value(prev.speed) : value,
     }));
   }, []);
 
@@ -134,7 +123,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
           setState((prev) => ({
             ...prev,
             language: loadedSettings.language,
-            speed: loadedSettings.speed,
             text: loadedSettings.text,
             isOptimizeWithAI: loadedSettings.isOptimizeWithAI,
           }));
@@ -170,7 +158,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
       await addItem(DB_CONFIG, "ttsSettings", {
         id: 1,
         language: state.language,
-        speed: state.speed,
         text: state.text,
         isOptimizeWithAI: state.isOptimizeWithAI,
       });
@@ -197,12 +184,17 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
       setAudioUrl(null);
 
       try {
-        const blob = await fetchTTSData(
-          text,
-          state.language,
-          state.speed,
-          isOptimizeWithAI
-        );
+        const blob = await fetch("/api/text-to-speech", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text,
+            language: state.language,
+            isOptimizeWithAI,
+          }),
+        });
 
         if (blob) {
           const arrayBuffer = await blob.arrayBuffer();
@@ -232,7 +224,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
         setIsLoading(false);
       }
     },
-    [state.language, state.speed]
+    [state.language]
   );
 
   // History management
@@ -296,7 +288,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     ...state,
     // Controls
     setLanguage,
-    setSpeed,
     setText,
     setIsOptimizeWithAI,
     // Audio

@@ -1,43 +1,31 @@
 {
-  "name": "audioshub",
+  "name": "audios-hub",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "file-saver": "^2.0.5",
-    "i": "^0.3.7",
-    "jszip": "^3.10.1",
-    "lucide-react": "^0.477.0",
-    "npm": "^11.2.0",
+    "lucide-react": "^0.484.0",
+    "next": "15.2.4",
+    "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "uuid": "^11.1.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/file-saver": "^2.0.7",
-    "@types/node": "^22.13.9",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react-swc": "^3.8.0",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.11",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.24.1",
-    "vite": "^6.2.0"
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4.0.16",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.4",
+    "tailwindcss": "^4.0.16",
+    "typescript": "^5"
   }
 }

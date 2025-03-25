@@ -234,7 +234,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
   return (
     <div
-      className="w-full max-w-xl p-4 bg-white rounded-xl dark:bg-gray-800 transition-all"
+      className="w-full max-w-xl p-4 bg-white rounded-xl transition-all"
       style={{
         boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
         marginTop: "2px",
@@ -243,9 +243,9 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
       <div className="flex flex-col gap-2">
-        <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden dark:bg-gray-700">
+        <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className="absolute h-full bg-gray-500 dark:bg-gray-400 transition-all"
+            className="absolute h-full bg-gray-500 transition-all"
             style={{ width: `${progressPercentage}%` }}
           />
           <input
@@ -259,7 +259,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
           />
         </div>
 
-        <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-300">
+        <div className="flex justify-between text-xs font-medium text-gray-600">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
@@ -268,7 +268,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => togglePlay()}
-              className="p-2 bg-gray-500 rounded-full text-white hover:bg-gray-600 transition-colors dark:bg-gray-600 dark:hover:bg-gray-500"
+              className="p-2 bg-gray-500 rounded-full text-white hover:bg-gray-600 transition-colors"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
@@ -280,7 +280,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
             <button
               onClick={toggleMute}
-              className="p-2 text-gray-600 hover:text-blue-500 transition-colors dark:text-gray-300 dark:hover:text-blue-400"
+              className="p-2 text-gray-600 hover:text-blue-500 transition-colors"
               aria-label={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted || volume === 0 ? (
@@ -291,7 +291,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
             </button>
             <input
               type="range"
-              className="w-16 h-1 bg-gray-200 rounded-full appearance-none cursor-pointer dark:bg-gray-700"
+              className="w-16 h-1 bg-gray-200 rounded-full appearance-none cursor-pointer"
               min="0"
               max="1"
               step="0.01"
@@ -303,7 +303,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
           <button
             onClick={toggleRepeat}
-            className={`p-2 text-gray-600 transition-colors dark:text-gray-300 dark:hover:text-blue-400 ${
+            className={`p-2 text-gray-600 transition-colors ${
               isRepeating ? "text-blue-500" : ""
             }`}
             aria-label={isRepeating ? "Disable Repeat" : "Enable Repeat"}
@@ -313,7 +313,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
 
           <button
             onClick={handleDownload}
-            className="p-2 text-gray-600 hover:text-blue-500 transition-colors dark:text-gray-300 dark:hover:text-blue-400"
+            className="p-2 text-gray-600 hover:text-blue-500 transition-colors"
             aria-label="Download Audio"
           >
             <Download size={16} />
@@ -328,7 +328,7 @@ const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
             className={`px-2 py-1 text-xs rounded-md transition-colors ${
               playbackRate === rate
                 ? "bg-blue-500 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
             }`}
             aria-label={`Set playback speed to ${rate}x`}
           >

@@ -1,6 +1,7 @@
+"use client";
+
 import { useEffect, useState, useMemo } from "react";
 import { Toaster } from "react-hot-toast";
-import "./App.css";
 import TextToSpeech from "./components/TextToSpeech";
 import AudioRecorderPanel from "./components/AudioRecorderPanel";
 
@@ -10,6 +11,7 @@ enum Tab {
 }
 
 const getDefaultTab = (): Tab => {
+  if (typeof window === "undefined") return Tab.TTS;
   const urlSearchParams = new URLSearchParams(window.location.search);
   const tabFromUrl = urlSearchParams.get("tab") as Tab;
   return Object.values(Tab).includes(tabFromUrl) ? tabFromUrl : Tab.TTS;
@@ -19,9 +21,11 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>(getDefaultTab);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set("tab", activeTab);
-    window.history.pushState({}, "", url.toString());
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", activeTab);
+      window.history.pushState({}, "", url.toString());
+    }
   }, [activeTab]);
 
   const tabComponents = useMemo(
@@ -32,22 +36,22 @@ function App() {
     []
   );
 
-  const renderTabButton = useMemo(
-    () => (tab: Tab, label: string) =>
-      (
-        <button
-          className={`tab-btn flex-1 py-2 text-center rounded-md ${
-            activeTab === tab
-              ? "bg-black text-white"
-              : "bg-gray-200 text-gray-700"
-          }`}
-          onClick={() => setActiveTab(tab)}
-        >
-          {label}
-        </button>
-      ),
-    [activeTab]
-  );
+  const renderTabButton = useMemo(() => {
+    const TabButton = (tab: Tab, label: string) => (
+      <button
+        className={`tab-btn flex-1 py-2 text-center rounded-md ${
+          activeTab === tab
+            ? "bg-black text-white"
+            : "bg-gray-200 text-gray-700"
+        }`}
+        onClick={() => setActiveTab(tab)}
+      >
+        {label}
+      </button>
+    );
+    TabButton.displayName = "TabButton";
+    return TabButton;
+  }, [activeTab]);
 
   return (
     <div className="bg-white text-gray-900 font-sans">

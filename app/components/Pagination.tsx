@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
   currentPage: number;
@@ -40,7 +40,7 @@ const Pagination: React.FC<PaginationProps> = ({
         className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         aria-label="Previous page"
       >
-        <ChevronLeftIcon className="w-5 h-5" />
+        <ChevronLeft className="w-5 h-5" />
       </button>
 
       {pageNumbers.map((page) => (
@@ -63,7 +63,7 @@ const Pagination: React.FC<PaginationProps> = ({
         className="p-2 rounded-md text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         aria-label="Next page"
       >
-        <ChevronRightIcon className="w-5 h-5" />
+        <ChevronRight className="w-5 h-5" />
       </button>
     </nav>
   );

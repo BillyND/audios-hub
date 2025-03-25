@@ -1,9 +1,8 @@
 import { useBreakpoints } from "../hooks/useBreakpoints";
 import useTextToSpeech from "../hooks/useTextToSpeech";
 import AudioPlayer from "./AudioPlayer";
-import GenerateButton from "./GenerateButton";
 import AudiosHistory from "./AudiosHistory";
-import SpeedControl from "./SpeedControl";
+import GenerateButton from "./GenerateButton";
 import TextSettings from "./TextSettings";
 
 const TextToSpeech = () => {
@@ -18,8 +17,6 @@ const TextToSpeech = () => {
     language,
     deleteHistoryItem,
     setLanguage,
-    speed,
-    setSpeed,
     text,
     setText,
     isOptimizeWithAI,
@@ -46,11 +43,7 @@ const TextToSpeech = () => {
                 setIsOptimizeWithAI={setIsOptimizeWithAI}
                 isLoading={isLoading}
               />
-              <SpeedControl
-                speed={speed}
-                setSpeed={setSpeed}
-                isLoading={isLoading}
-              />
+
               <GenerateButton
                 generateSpeech={() => generateSpeech(text, isOptimizeWithAI)}
                 isLoading={isLoading}
