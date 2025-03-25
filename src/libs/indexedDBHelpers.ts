@@ -136,11 +136,8 @@ export const deleteItem = async (
 export const loadItems = async <T>(
   config: DBConfig,
   storeName: string,
-  indexName: string
+  indexName?: string // Make indexName optional
 ): Promise<T[]> => {
-  console.log("===>storeName", storeName);
-  console.log("===>indexName", indexName);
-
   try {
     const db = await initDB(config);
 
@@ -148,14 +145,19 @@ export const loadItems = async <T>(
       const transaction = db.transaction(storeName, "readonly");
       const store = transaction.objectStore(storeName);
 
-      console.log("===>store", store);
+      let request;
 
-      const index = store.index(indexName);
-      const request = index.getAll();
+      // Check if we need to use an index and if it exists
+      if (indexName && Array.from(store.indexNames).includes(indexName)) {
+        const index = store.index(indexName);
+        request = index.getAll();
+      } else {
+        // Fall back to getting all items from the store
+        request = store.getAll();
+      }
 
       request.onsuccess = () => {
         const items = request.result as T[];
-
         resolve(items);
       };
 

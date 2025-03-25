@@ -152,14 +152,12 @@ const useTTS = (): UseTTSResult => {
           setAudioUrl(audioUrl);
         } catch (error) {
           console.error("Failed to save history item:", error);
-          toast.error("Speech generated but not saved to history");
           // Still set the audio URL so it can be played
           setAudioUrl(audioUrl);
         }
       }
     } catch (error) {
       console.error("Error generating TTS:", error);
-      toast.error("Speech synthesis failed. Try again later.");
     } finally {
       setIsLoading(false);
     }
