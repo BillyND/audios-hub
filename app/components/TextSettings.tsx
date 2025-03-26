@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useDebounce from "../hooks/useDebounce";
 
 interface TextSettingsProps {
@@ -15,9 +15,6 @@ interface TextSettingsProps {
 const TextSettings: React.FC<TextSettingsProps> = ({
   text,
   setText,
-  // language,
-  // setLanguage,
-  // languages,
   isOptimizeWithAI,
   setIsOptimizeWithAI,
   isLoading,
@@ -52,52 +49,17 @@ const TextSettings: React.FC<TextSettingsProps> = ({
   }, [isOptimizeWithAI]);
 
   return (
-    <>
-      <div className="mb-2">
-        <label className="block text-gray-700 mb-2">Enter Text:</label>
-        <textarea
-          id="textInput"
-          className="w-full p-3 text-gray-700 rounded-md focus:ring-blue-500 transition resize-none h-24 border border-gray-300 focus:outline-none focus:border-gray-700"
-          placeholder="Type your text here..."
-          value={localText}
-          onChange={(e) => setLocalText(e.target.value)}
-          disabled={isLoading}
-        ></textarea>
-      </div>
-      {/* <div>
-        <label className="block text-gray-700 mb-2">Select Language:</label>
-        <select
-          id="languageSelect"
-          className="w-full p-3 text-gray-900 rounded-md border border-gray-200"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          disabled={isLoading}
-        >
-          {languages &&
-            languages.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.name}
-              </option>
-            ))}
-        </select>
-      </div> */}
-      {/* <div className="mt-4 flex items-center">
-        <label
-          htmlFor="optimizeWithAI"
-          className="block text-gray-700 cursor-pointer"
-        >
-          Optimize with AI:
-        </label>
-        <input
-          type="checkbox"
-          id="optimizeWithAI"
-          className="checkbox w-4 h-4 mx-2"
-          checked={isOptimizeAIState}
-          onChange={(e) => setIsOptimizeAIState(e.target.checked)}
-          disabled={isLoading}
-        />
-      </div> */}
-    </>
+    <div style={{ marginBottom: "-12px" }}>
+      <span className="block text-gray-700">Enter Text:</span>
+      <textarea
+        id="textInput"
+        className="w-full p-3 text-gray-700 rounded-md focus:ring-blue-500 transition resize-none h-24 border border-gray-300 focus:outline-none focus:border-gray-700"
+        placeholder="Type your text here..."
+        value={localText}
+        onChange={(e) => setLocalText(e.target.value)}
+        disabled={isLoading}
+      />
+    </div>
   );
 };
 

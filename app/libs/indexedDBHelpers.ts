@@ -30,6 +30,7 @@ export interface TTSSettings {
   speed: number;
   text: string;
   isOptimizeWithAI: boolean;
+  voice: string;
 }
 
 export interface LanguageOption {

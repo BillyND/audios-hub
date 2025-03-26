@@ -23,12 +23,14 @@ interface TTSState {
   language: string;
   text: string;
   isOptimizeWithAI: boolean;
+  voice: string;
 }
 
 interface TTSControls {
   setLanguage: Dispatch<React.SetStateAction<string>>;
   setText: Dispatch<React.SetStateAction<string>>;
   setIsOptimizeWithAI: Dispatch<React.SetStateAction<boolean>>;
+  setVoice: Dispatch<React.SetStateAction<string>>;
 }
 
 interface TTSHistory {
@@ -41,7 +43,11 @@ interface TTSHistory {
 interface TTSAudio {
   audioUrl: string | null;
   isLoading: boolean;
-  generateSpeech: (text: string, isOptimizeWithAI: boolean) => Promise<void>;
+  generateSpeech: (
+    text: string,
+    isOptimizeWithAI: boolean,
+    voice: string
+  ) => Promise<void>;
 }
 
 interface UseTextToSpeechResult
@@ -50,8 +56,6 @@ interface UseTextToSpeechResult
     TTSHistory,
     TTSAudio {
   languages: LanguageOption[];
-  voice: string;
-  setVoice: Dispatch<React.SetStateAction<string>>;
 }
 
 const useTextToSpeech = (): UseTextToSpeechResult => {
@@ -60,17 +64,17 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     language: "en",
     text: "",
     isOptimizeWithAI: false,
+    voice: "alloy",
   });
 
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [history, setHistory] = useState<TTSHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [voice, setVoice] = useState("alloy");
 
   useEffect(() => {
-    console.log("Voice setting:", voice);
-  }, [voice]);
+    console.log("Voice setting:", state.voice);
+  }, [state.voice]);
 
   // Memoized state setters
   const setLanguage = useCallback((value: React.SetStateAction<string>) => {
@@ -97,6 +101,13 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     },
     []
   );
+
+  const setVoice = useCallback((value: React.SetStateAction<string>) => {
+    setState((prev) => ({
+      ...prev,
+      voice: typeof value === "function" ? value(prev.voice) : value,
+    }));
+  }, []);
 
   // Initialize database and load data
   useEffect(() => {
@@ -132,6 +143,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
             language: loadedSettings.language,
             text: loadedSettings.text,
             isOptimizeWithAI: loadedSettings.isOptimizeWithAI,
+            voice: loadedSettings.voice,
           }));
         }
       } catch (error) {
@@ -167,6 +179,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
         language: state.language,
         text: state.text,
         isOptimizeWithAI: state.isOptimizeWithAI,
+        voice: state.voice,
       });
     } catch (error) {
       console.error("Failed to save settings:", error);
@@ -181,7 +194,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
 
   // Speech generation
   const generateSpeech = useCallback(
-    async (text: string, isOptimizeWithAI: boolean) => {
+    async (text: string, isOptimizeWithAI: boolean, voice: string) => {
       if (!text.trim()) {
         toast.error("Text input cannot be empty!");
         return;
@@ -298,6 +311,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     setLanguage,
     setText,
     setIsOptimizeWithAI,
+    setVoice,
     // Audio
     audioUrl,
     isLoading,
@@ -309,10 +323,6 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     deleteHistoryItem,
     // Languages
     languages,
-
-    //voice
-    voice,
-    setVoice,
   };
 };
 
