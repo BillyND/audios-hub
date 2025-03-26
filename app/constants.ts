@@ -10,6 +10,15 @@ export const baseEndPoint = process.env.NEXT_PUBLIC_BASE_END_POINT?.replace(
   ""
 ) as string;
 
+export const OPENAI_VOICES = {
+  alloy: "Alloy (Male, Warm and Deep)",
+  echo: "Echo (Neutral, Clear)",
+  fable: "Fable (Female, Storytelling)",
+  onyx: "Onyx (Male, Strong and Sharp)",
+  nova: "Nova (Female, Young and Dynamic)",
+  shimmer: "Shimmer (Female, Soft and Gentle)",
+};
+
 export const LANGUAGES = {
   en: "English",
   vi: "Vietnamese",
