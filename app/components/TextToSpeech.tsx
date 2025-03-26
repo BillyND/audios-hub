@@ -1,3 +1,4 @@
+import { OPENAI_VOICES } from "../constants";
 import { useBreakpoints } from "../hooks/useBreakpoints";
 import useTextToSpeech from "../hooks/useTextToSpeech";
 import AudioPlayer from "./AudioPlayer";
@@ -21,6 +22,8 @@ const TextToSpeech = () => {
     setText,
     isOptimizeWithAI,
     setIsOptimizeWithAI,
+    voice,
+    setVoice,
   } = useTextToSpeech();
 
   return (
@@ -43,6 +46,29 @@ const TextToSpeech = () => {
                 setIsOptimizeWithAI={setIsOptimizeWithAI}
                 isLoading={isLoading}
               />
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor="voice-select"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Select Voice
+                </label>
+                <select
+                  id="voice-select"
+                  value={voice}
+                  onChange={(e) => setVoice(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  {Object.entries(OPENAI_VOICES).map(
+                    ([voiceKey, voiceLabel]) => (
+                      <option key={voiceKey} value={voiceKey}>
+                        {voiceLabel}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
 
               <GenerateButton
                 generateSpeech={() => generateSpeech(text, isOptimizeWithAI)}

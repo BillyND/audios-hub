@@ -50,6 +50,8 @@ interface UseTextToSpeechResult
     TTSHistory,
     TTSAudio {
   languages: LanguageOption[];
+  voice: string;
+  setVoice: Dispatch<React.SetStateAction<string>>;
 }
 
 const useTextToSpeech = (): UseTextToSpeechResult => {
@@ -64,6 +66,11 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
   const [history, setHistory] = useState<TTSHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [voice, setVoice] = useState("alloy");
+
+  useEffect(() => {
+    console.log("Voice setting:", voice);
+  }, [voice]);
 
   // Memoized state setters
   const setLanguage = useCallback((value: React.SetStateAction<string>) => {
@@ -193,6 +200,7 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
             text,
             language: state.language,
             isOptimizeWithAI,
+            voice,
           }),
         });
 
@@ -301,6 +309,10 @@ const useTextToSpeech = (): UseTextToSpeechResult => {
     deleteHistoryItem,
     // Languages
     languages,
+
+    //voice
+    voice,
+    setVoice,
   };
 };
 

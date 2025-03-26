@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { OPENAI_VOICES } from "../../constants";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { text, voice } = body;
+    const { text, voice = OPENAI_VOICES.alloy } = body;
     const apiKey = process.env.OPENAI_API_KEY;
     const url = "https://api.openai.com/v1/audio/speech";
 
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: "tts-1",
         input: text,
-        voice: voice || "alloy",
+        voice,
       }),
     });
 
