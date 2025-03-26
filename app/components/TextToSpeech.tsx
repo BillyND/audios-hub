@@ -4,26 +4,32 @@ import useTextToSpeech from "../hooks/useTextToSpeech";
 import AudioPlayer from "./AudioPlayer";
 import AudiosHistory from "./AudiosHistory";
 import GenerateButton from "./GenerateButton";
+import CustomDropdown from "./CustomDropdown";
 import TextSettings from "./TextSettings";
 
 const TextToSpeech = () => {
   const { isMobile } = useBreakpoints();
 
   const {
-    generateSpeech,
+    // State variables
     audioUrl,
     history,
-    languages,
     isLoading,
+    text,
     language,
+    languages,
+    voice,
+    isOptimizeWithAI,
+
+    // Setter functions
     deleteHistoryItem,
     setLanguage,
-    text,
     setText,
-    isOptimizeWithAI,
     setIsOptimizeWithAI,
-    voice,
     setVoice,
+
+    // Methods
+    generateSpeech,
   } = useTextToSpeech();
 
   return (
@@ -35,7 +41,7 @@ const TextToSpeech = () => {
             style={isMobile ? {} : { maxHeight: "90vdh" }}
           >
             {/* Left Panel (TTS) */}
-            <div id="tts-panel" className="md:w-2/3 flex flex-col">
+            <div id="tts-panel" className="md:w-2/3 flex flex-col gap-4">
               <TextSettings
                 text={text}
                 setText={setText}
@@ -48,30 +54,18 @@ const TextToSpeech = () => {
               />
 
               <div className="flex flex-col">
-                <label
-                  htmlFor="voice-select"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Select Voice
-                </label>
-                <select
-                  id="voice-select"
+                <span className="block text-gray-700"> Select Voice</span>
+                <CustomDropdown
+                  options={OPENAI_VOICES}
                   value={voice}
-                  onChange={(e) => setVoice(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  {Object.entries(OPENAI_VOICES).map(
-                    ([voiceKey, voiceLabel]) => (
-                      <option key={voiceKey} value={voiceKey}>
-                        {voiceLabel}
-                      </option>
-                    )
-                  )}
-                </select>
+                  onChange={setVoice}
+                />
               </div>
 
               <GenerateButton
-                generateSpeech={() => generateSpeech(text, isOptimizeWithAI)}
+                generateSpeech={() =>
+                  generateSpeech(text, isOptimizeWithAI, voice)
+                }
                 isLoading={isLoading}
               />
               <AudioPlayer audioUrl={audioUrl} isLoading={isLoading} />
