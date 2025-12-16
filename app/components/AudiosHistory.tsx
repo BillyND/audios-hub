@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useBreakpoints } from "../hooks/useBreakpoints";
 import CustomAudioPlayer from "./CustomAudioPlayer";
 import Modal from "./Modal";
@@ -19,26 +19,50 @@ const AudiosHistory: React.FC<AudiosHistoryProps> = ({
     null
   );
 
-  const handleDelete = async (id: string) => {
-    const audioToDelete = audios.find((audio) => audio.id === id);
-    if (!audioToDelete) {
-      console.error("No audio found with id:", id);
-      return;
-    }
+  const handleDelete = useCallback(
+    async (id: string) => {
+      const audioToDelete = audios.find((audio) => audio.id === id);
+      if (!audioToDelete) {
+        console.error("===> No audio found with id:", id);
+        return;
+      }
 
-    try {
-      await deleteItem(id);
-    } catch (error) {
-      console.error("Failed to delete audio:", error);
-    }
+      try {
+        await deleteItem(id);
+      } catch (error) {
+        console.error("===> Failed to delete audio:", error);
+      }
 
-    setIsModalOpen(false);
-  };
+      setIsModalOpen(false);
+    },
+    [audios, deleteItem]
+  );
 
   const openModal = (id: string) => {
     setPendingDeletionId(id);
     setIsModalOpen(true);
   };
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (pendingDeletionId !== null) {
+          handleDelete(pendingDeletionId);
+        }
+      } else if (e.key === "Escape") {
+        setIsModalOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isModalOpen, pendingDeletionId, handleDelete]);
 
   return (
     <div
